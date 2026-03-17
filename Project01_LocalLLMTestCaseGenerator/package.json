@@ -1,0 +1,11 @@
+{
+  "name": "local-llm-test-case-generator",
+  "version": "1.0.0",
+  "description": "TestGen Buddy - Generate enterprise-grade test cases with local AI",
+  "scripts": {
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm run dev",
+    "setup": "cd frontend && npm install && cd ../backend && npm install",
+    "fresh-start": "npm run build && npm start"
+  }
+}
