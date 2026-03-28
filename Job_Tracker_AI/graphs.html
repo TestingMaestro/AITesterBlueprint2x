@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobTracker AI — Analytics</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:        #F0F4F9;
+  --surface:   #FFFFFF;
+  --sidebar:   #0B1829;
+  --sid-act:   #1A3A5C;
+  --sid-hov:   rgba(255,255,255,0.07);
+  --accent:    #1B5FE8;
+  --acc-lt:    #EAF0FD;
+  --acc-dim:   rgba(27,95,232,0.10);
+  --acc-hov:   #1449C0;
+  --t1:#0C1A2E; --t2:#4E6278; --t3:#8A9EAF; --tsb:#7A9AB8;
+  --bd:#DDE4EE; --bds:#C4CFDC;
+  --green:#16A34A; --gbg:#F0FDF4; --gdot:#22C55E;
+  --blue:#1D4ED8;  --bbg:#EFF6FF; --bdot:#3B82F6;
+  --ora:#C2410C;   --obg:#FFF7ED; --odot:#FB923C;
+  --pur:#7E22CE;   --pbg:#FAF5FF; --pdot:#A855F7;
+  --red:#DC2626;   --rbg:#FEF2F2; --rdot:#EF4444;
+  --tea:#0F766E;   --tbg:#F0FDFA; --tdot:#14B8A6;
+  --sh1:0 1px 4px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --sh2:0 4px 16px rgba(0,0,0,0.09),0 2px 6px rgba(0,0,0,0.04);
+  --sh3:0 12px 40px rgba(0,0,0,0.13),0 4px 12px rgba(0,0,0,0.06);
+  --r1:5px; --r2:8px; --r3:12px; --r4:16px;
+  --sw:224px; --th:56px;
+  --font:'DM Sans',sans-serif; --mono:'DM Mono',monospace;
+  --ease:0.15s ease;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);font-size:13.5px;line-height:1.5;display:flex;flex-direction:column;}
+button,input,select{font-family:var(--font);}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bds);border-radius:10px;}
+
+/* TOPBAR */
+.topbar{height:var(--th);min-height:var(--th);background:var(--surface);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 18px 0 0;box-shadow:var(--sh1);z-index:200;flex-shrink:0;}
+.brand{width:var(--sw);min-width:var(--sw);display:flex;align-items:center;gap:9px;padding:0 16px;height:100%;border-right:1px solid var(--bd);flex-shrink:0;}
+.brand-logo{width:30px;height:30px;border-radius:var(--r2);background:var(--accent);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff;letter-spacing:-0.5px;flex-shrink:0;}
+.brand-name{font-size:14.5px;font-weight:700;color:var(--t1);letter-spacing:-0.4px;}
+.brand-name em{color:var(--accent);font-style:normal;}
+.tb-center{flex:1;display:flex;align-items:center;gap:10px;padding:0 18px;}
+.tb-lbl{font-size:14px;font-weight:600;color:var(--t1);display:flex;align-items:center;gap:7px;}
+.tb-pill{font-size:11px;font-weight:700;background:var(--acc-lt);color:var(--accent);padding:2px 9px;border-radius:20px;}
+.spacer{flex:1;}
+.tb-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.tbtn{display:flex;align-items:center;gap:5px;padding:0 12px;height:34px;border-radius:var(--r2);border:1px solid var(--bd);background:var(--surface);font-size:12.5px;font-weight:500;color:var(--t2);cursor:pointer;transition:all var(--ease);}
+.tbtn:hover{border-color:var(--accent);color:var(--accent);background:var(--acc-lt);}
+.tbtn.pri{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(27,95,232,0.28);}
+.tbtn.pri:hover{background:var(--acc-hov);}
+
+/* LAYOUT */
+.app-body{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sw);min-width:var(--sw);background:var(--sidebar);display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;}
+.si{padding:12px 0 0;display:flex;flex-direction:column;height:100%;}
+.slbl{font-size:10px;font-weight:700;letter-spacing:0.9px;text-transform:uppercase;color:#3A5675;padding:14px 16px 5px;}
+.navlist{display:flex;flex-direction:column;gap:1px;padding:0 8px;}
+.nitem{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r2);cursor:pointer;color:var(--tsb);font-size:13px;font-weight:500;transition:all var(--ease);}
+.nitem:hover{background:var(--sid-hov);color:#fff;}
+.nitem.active{background:var(--sid-act);color:#fff;}
+.nbadge{margin-left:auto;min-width:18px;height:18px;border-radius:9px;background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 5px;}
+.sdiv{height:1px;background:rgba(255,255,255,0.06);margin:10px 14px;}
+.scards{padding:4px 10px;display:flex;flex-direction:column;gap:3px;}
+.scard{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:var(--r2);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);}
+.scard-l{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--tsb);}
+.sdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.spill{font-family:var(--mono);font-size:11.5px;font-weight:500;color:#fff;background:rgba(255,255,255,0.1);padding:1px 8px;border-radius:20px;min-width:22px;text-align:center;}
+.sfooter{margin-top:auto;padding:8px 8px 12px;border-top:1px solid rgba(255,255,255,0.06);}
+.fitem{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:var(--r2);color:var(--tsb);font-size:12.5px;cursor:pointer;transition:all var(--ease);}
+.fitem:hover{background:var(--sid-hov);color:#fff;}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:22px 24px;display:flex;flex-direction:column;gap:18px;min-width:0;}
+
+/* PAGE HEAD */
+.phead{display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;}
+.ptitle{font-size:22px;font-weight:700;letter-spacing:-0.6px;color:var(--t1);}
+.psub{font-size:13px;color:var(--t2);margin-top:2px;}
+
+/* KPI STRIP */
+.kpi-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;}
+.kpi{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r3);padding:14px 16px;box-shadow:var(--sh1);transition:box-shadow .2s,transform .2s;animation:fadeUp .3s ease both;}
+.kpi:hover{box-shadow:var(--sh2);transform:translateY(-1px);}
+.kpi:nth-child(1){animation-delay:.00s}.kpi:nth-child(2){animation-delay:.05s}
+.kpi:nth-child(3){animation-delay:.10s}.kpi:nth-child(4){animation-delay:.15s}.kpi:nth-child(5){animation-delay:.20s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.kpi-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--t3);}
+.kpi-ico{width:28px;height:28px;border-radius:var(--r1);display:flex;align-items:center;justify-content:center;}
+.kpi-val{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-1.5px;color:var(--t1);}
+.kpi-val.sm{font-size:16px;letter-spacing:-0.5px;}
+.kpi-foot{font-size:11px;color:var(--t3);margin-top:3px;}
+
+/* CHART CARDS */
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.full{grid-column:1/-1;}
+
+.ccard{background:var(--surface);border:1px solid var(--bd);border-radius:var(--r3);padding:18px;box-shadow:var(--sh1);transition:box-shadow .2s;animation:fadeUp .35s ease both;display:flex;flex-direction:column;}
+.ccard:hover{box-shadow:var(--sh2);}
+.ccard-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap;}
+.cmeta{flex:1;min-width:0;}
+.ctitle{font-size:13.5px;font-weight:600;color:var(--t1);}
+.csub{font-size:11.5px;color:var(--t3);margin-top:2px;}
+.ccontrols{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+
+/* DROPDOWN */
+.csel{
+  height:30px;padding:0 26px 0 10px;
+  border:1px solid var(--bd);border-radius:var(--r2);
+  background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238A9EAF' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 7px center;
+  font-family:var(--font);font-size:12px;font-weight:500;
+  color:var(--t2);appearance:none;cursor:pointer;outline:none;transition:border-color var(--ease);
+}
+.csel:focus{border-color:var(--accent);}
+
+.rbtn{width:30px;height:30px;border-radius:var(--r2);border:1px solid var(--bd);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);transition:all var(--ease);flex-shrink:0;}
+.rbtn:hover{border-color:var(--accent);color:var(--accent);background:var(--acc-lt);}
+
+.cbody{position:relative;flex:1;min-height:0;}
+.cbody canvas{width:100%!important;height:100%!important;}
+.h200 .cbody{height:200px;}
+.h220 .cbody{height:220px;}
+.h240 .cbody{height:240px;}
+.h260 .cbody{height:260px;}
+
+/* TOAST */
+#toasts{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{display:flex;align-items:center;gap:10px;padding:11px 16px;border-radius:var(--r3);background:var(--t1);color:#fff;font-size:13px;font-weight:500;box-shadow:var(--sh3);pointer-events:all;max-width:320px;animation:tIn .25s ease;}
+.toast.success{background:#15803D;}.toast.error{background:#DC2626;}.toast.warning{background:#B45309;}
+@keyframes tIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes tOut{from{opacity:1}to{opacity:0;transform:translateX(20px)}}
+
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;z-index:1000;background:rgba(11,24,41,0.48);backdrop-filter:blur(4px);align-items:center;justify-content:center;}
+.mbg.open{display:flex;}
+.modal{background:var(--surface);border-radius:var(--r4);width:480px;max-width:96vw;padding:24px;box-shadow:var(--sh3);animation:fadeUp .22s ease;}
+.mhd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.mtl{font-size:16px;font-weight:700;letter-spacing:-0.3px;}
+.mcl{width:28px;height:28px;border-radius:var(--r1);border:1px solid var(--bd);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all var(--ease);}
+.mcl:hover{background:var(--bg);color:var(--t1);}
+.mgr{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fl{display:block;font-size:11.5px;font-weight:700;color:var(--t2);margin-bottom:5px;}
+.fi,.fs{width:100%;height:38px;border:1.5px solid var(--bds);border-radius:var(--r2);padding:0 12px;font-size:13.5px;background:var(--bg);color:var(--t1);outline:none;transition:border-color var(--ease),box-shadow var(--ease);}
+.fi:focus,.fs:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--acc-dim);}
+.fi::placeholder{color:var(--t3);}
+.fs{appearance:none;cursor:pointer;}
+.mft{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;padding-top:16px;border-top:1px solid var(--bd);}
+.mbts{padding:0 16px;height:36px;border-radius:var(--r2);border:1px solid var(--bd);background:transparent;font-size:13.5px;font-weight:500;color:var(--t2);cursor:pointer;}
+.mbtp{padding:0 18px;height:36px;border-radius:var(--r2);border:none;background:var(--accent);font-size:13.5px;font-weight:600;color:#fff;cursor:pointer;}
+.mbtp:hover{background:var(--acc-hov);}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-logo">JT</div>
+    <div class="brand-name">JobTracker<em>AI</em></div>
+  </div>
+  <div class="tb-center">
+    <div class="tb-lbl">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+      Analytics
+    </div>
+    <span class="tb-pill" id="jobPill">5 jobs</span>
+  </div>
+  <div class="spacer"></div>
+  <div class="tb-right">
+    <button class="tbtn" onclick="refreshAll()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+      Refresh
+    </button>
+    <button class="tbtn" onclick="loadSamples()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Sample Data
+    </button>
+    <button class="tbtn pri" onclick="openModal()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Job
+    </button>
+  </div>
+</header>
+
+<div class="app-body">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="si">
+    <div class="slbl">Navigation</div>
+    <div class="navlist">
+      <div class="nitem" onclick="toast('Open Dashboard in main app')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nitem" onclick="toast('Applications view')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Applications
+        <span class="nbadge" id="nb-apps">0</span>
+      </div>
+      <div class="nitem" onclick="toast('Interviews view')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Interviews
+        <span class="nbadge" id="nb-int">0</span>
+      </div>
+      <div class="nitem" onclick="toast('Documents view')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        Documents
+      </div>
+      <div class="nitem active">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        Analytics
+      </div>
+    </div>
+
+    <div class="sdiv"></div>
+    <div class="slbl">Quick Stats</div>
+    <div class="scards">
+      <div class="scard"><div class="scard-l"><span class="sdot" style="background:var(--bdot)"></span>Applied</div><span class="spill" id="sp-ap">0</span></div>
+      <div class="scard"><div class="scard-l"><span class="sdot" style="background:var(--odot)"></span>Interviews</div><span class="spill" id="sp-in">0</span></div>
+      <div class="scard"><div class="scard-l"><span class="sdot" style="background:var(--pdot)"></span>Offers</div><span class="spill" id="sp-of">0</span></div>
+      <div class="scard"><div class="scard-l"><span class="sdot" style="background:var(--rdot)"></span>Rejected</div><span class="spill" id="sp-rj">0</span></div>
+      <div class="scard"><div class="scard-l"><span class="sdot" style="background:var(--tdot)"></span>Wishlist</div><span class="spill" id="sp-wi">0</span></div>
+    </div>
+
+    <div class="sdiv"></div>
+    <div class="slbl">Global Filter</div>
+    <div style="padding:2px 10px 10px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:#3A5675;margin-bottom:5px">Filter by Status</div>
+      <select id="gFilter" onchange="refreshAll()" style="width:100%;padding:6px 10px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.09);border-radius:var(--r2);color:var(--tsb);font-size:12.5px;outline:none;appearance:none;cursor:pointer;">
+        <option value="">All Statuses</option>
+        <option value="Wishlist">Wishlist</option>
+        <option value="Applied">Applied</option>
+        <option value="Interview">Interview</option>
+        <option value="Offer">Offer</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+    </div>
+
+    <div class="sfooter">
+      <div class="fitem" onclick="clearJobs()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+        Clear All Data
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- HEAD -->
+  <div class="phead">
+    <div>
+      <div class="ptitle">Analytics</div>
+      <div class="psub">All amounts in ₹ · Select a metric and chart type from the dropdowns below</div>
+    </div>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip">
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-lbl">Total Jobs</div><div class="kpi-ico" style="background:var(--acc-lt)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg></div></div>
+      <div class="kpi-val" id="k-tot">0</div><div class="kpi-foot">In pipeline</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-lbl">Interviews</div><div class="kpi-ico" style="background:var(--obg)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--ora)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div></div>
+      <div class="kpi-val" id="k-int">0</div><div class="kpi-foot">Scheduled</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-lbl">Offers</div><div class="kpi-ico" style="background:var(--pbg)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--pur)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div></div>
+      <div class="kpi-val" id="k-off">0</div><div class="kpi-foot">Received</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-lbl">Avg AI Score</div><div class="kpi-ico" style="background:var(--gbg)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div></div>
+      <div class="kpi-val" id="k-sc">—</div><div class="kpi-foot">Match score</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-top"><div class="kpi-lbl">Highest Salary</div><div class="kpi-ico" style="background:var(--tbg)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--tea)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div></div>
+      <div class="kpi-val sm" id="k-sa">—</div><div class="kpi-foot">In pipeline</div>
+    </div>
+  </div>
+
+  <!-- SINGLE UNIFIED CHART CARD -->
+  <div class="ccard" style="animation-delay:.10s">
+    <div class="ccard-head">
+      <div class="cmeta">
+        <div class="ctitle" id="chart-title">Total Jobs</div>
+        <div class="csub" id="chart-sub">All jobs by company</div>
+      </div>
+      <div class="ccontrols">
+        <select class="csel" id="s-metric" onchange="drawMain()" style="font-weight:600;color:var(--t1);">
+          <option value="total">Total Jobs</option>
+          <option value="interviews">Interviews</option>
+          <option value="offers">Offers</option>
+          <option value="score">Avg AI Score</option>
+          <option value="salary">Highest Salary</option>
+          <option value="status">Status</option>
+          <option value="role">Role</option>
+        </select>
+        <select class="csel" id="s-type" onchange="drawMain()">
+          <option value="bar">Bar</option>
+          <option value="hbar">Horiz. Bar</option>
+          <option value="doughnut">Doughnut</option>
+          <option value="pie">Pie</option>
+          <option value="polarArea">Polar Area</option>
+          <option value="line">Line</option>
+          <option value="radar">Radar</option>
+        </select>
+        <button class="rbtn" onclick="drawMain()" title="Refresh">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="cbody" style="height:420px;"><canvas id="c-main"></canvas></div>
+  </div>
+
+</main>
+</div>
+
+<!-- ADD JOB MODAL -->
+<div class="mbg" id="mbg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mhd">
+      <div class="mtl">Add New Job</div>
+      <button class="mcl" onclick="closeModal()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="mgr">
+      <div><label class="fl">Company *</label><input class="fi" id="m-co" placeholder="e.g. Infosys"></div>
+      <div><label class="fl">Role *</label><input class="fi" id="m-ro" placeholder="e.g. Senior Engineer"></div>
+      <div><label class="fl">Status</label><select class="fs" id="m-st"><option>Wishlist</option><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></div>
+      <div><label class="fl">Salary (₹)</label><input class="fi" id="m-sa" placeholder="e.g. 1200000"></div>
+      <div><label class="fl">AI Score (0–100)</label><input class="fi" id="m-sc" type="number" min="0" max="100" placeholder="e.g. 82"></div>
+      <div><label class="fl">Date Applied</label><input class="fi" id="m-dt" type="date"></div>
+    </div>
+    <div class="mft">
+      <button class="mbts" onclick="closeModal()">Cancel</button>
+      <button class="mbtp" onclick="saveJob()">Add Job</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+'use strict';
+
+/* ── DATA ── */
+let jobs = [
+  {id:1,company:'OpenAI',  role:'Research Engineer',   status:'Wishlist',  salary:'Undisclosed',  date:'2026-03-17',score:null},
+  {id:2,company:'Figma',   role:'Frontend Engineer',   status:'Offer',     salary:'12000000',     date:'2026-02-28',score:91},
+  {id:3,company:'Stripe',  role:'Software Engineer II',status:'Interview', salary:'13300000',     date:'2026-03-05',score:84},
+  {id:4,company:'Vercel',  role:'Developer Advocate',  status:'Applied',   salary:'10000000',     date:'2026-03-13',score:72},
+  {id:5,company:'Linear',  role:'Product Engineer',    status:'Wishlist',  salary:'Undisclosed',  date:'2026-03-18',score:null},
+];
+
+/* ── PALETTE ── */
+const PAL = ['#1B5FE8','#22C55E','#FB923C','#A855F7','#EF4444','#14B8A6','#F59E0B','#EC4899','#6366F1','#84CC16','#0EA5E9','#F97316'];
+const SC  = {Wishlist:'#3B82F6',Applied:'#22C55E',Interview:'#FB923C',Offer:'#A855F7',Rejected:'#EF4444'};
+const CI  = {};  /* chart instance registry */
+
+/* ── CHART.JS DEFAULTS ── */
+Chart.defaults.font.family          = "'DM Sans',sans-serif";
+Chart.defaults.font.size            = 12;
+Chart.defaults.color                = '#8A9EAF';
+Chart.defaults.plugins.legend.labels.boxWidth = 11;
+Chart.defaults.plugins.legend.labels.padding  = 14;
+Chart.defaults.plugins.tooltip.padding        = 10;
+Chart.defaults.plugins.tooltip.cornerRadius   = 8;
+Chart.defaults.plugins.tooltip.backgroundColor = '#0C1A2E';
+
+/* ── HELPERS ── */
+function toNum(v){
+  if(!v||v==='Undisclosed') return 0;
+  return parseInt(String(v).replace(/[^0-9]/g,''))||0;
+}
+function fmtL(n){ /* lakhs/crores short form */
+  if(!n) return '—';
+  if(n>=10000000) return '₹'+(n/10000000).toFixed(1)+'Cr';
+  if(n>=100000)   return '₹'+(n/100000).toFixed(1)+'L';
+  return '₹'+Number(n).toLocaleString('en-IN');
+}
+function fmtFull(n){
+  if(!n) return '₹0';
+  return '₹'+Number(n).toLocaleString('en-IN');
+}
+function filtered(){
+  const f=document.getElementById('gFilter').value;
+  return f ? jobs.filter(j=>j.status===f) : [...jobs];
+}
+function col(i){ return PAL[i%PAL.length]; }
+function colA(i,a){ return PAL[i%PAL.length]+(a||'CC'); }
+
+/* ── KPI + SIDEBAR ── */
+function updateKPIs(){
+  const f=filtered();
+  document.getElementById('k-tot').textContent = f.length;
+  document.getElementById('k-int').textContent = f.filter(j=>j.status==='Interview').length;
+  document.getElementById('k-off').textContent = f.filter(j=>j.status==='Offer').length;
+  const sc=f.filter(j=>j.score!==null);
+  document.getElementById('k-sc').textContent  = sc.length?Math.round(sc.reduce((a,j)=>a+j.score,0)/sc.length):'—';
+  const sals=f.map(j=>toNum(j.salary)).filter(Boolean);
+  document.getElementById('k-sa').textContent  = sals.length?fmtL(Math.max(...sals)):'—';
+  document.getElementById('jobPill').textContent = jobs.length+' job'+(jobs.length!==1?'s':'');
+  document.getElementById('nb-apps').textContent = jobs.filter(j=>j.status!=='Wishlist').length;
+  document.getElementById('nb-int').textContent  = jobs.filter(j=>j.status==='Interview').length;
+  document.getElementById('sp-ap').textContent   = jobs.filter(j=>j.status==='Applied').length;
+  document.getElementById('sp-in').textContent   = jobs.filter(j=>j.status==='Interview').length;
+  document.getElementById('sp-of').textContent   = jobs.filter(j=>j.status==='Offer').length;
+  document.getElementById('sp-rj').textContent   = jobs.filter(j=>j.status==='Rejected').length;
+  document.getElementById('sp-wi').textContent   = jobs.filter(j=>j.status==='Wishlist').length;
+}
+
+/* ── CHART FACTORY ── */
+function mk(canvasId, type, labels, datasets, extra){
+  if(CI[canvasId]){ CI[canvasId].destroy(); delete CI[canvasId]; }
+  const canvas = document.getElementById(canvasId);
+  if(!canvas) return;
+  const isH   = type==='hbar';
+  const real  = isH ? 'bar' : type;
+  const circ  = ['doughnut','pie','polarArea'].includes(real);
+  const radar = real==='radar';
+  CI[canvasId] = new Chart(canvas,{
+    type:real,
+    data:{labels,datasets},
+    options:{
+      indexAxis: isH?'y':'x',
+      responsive:true, maintainAspectRatio:false,
+      animation:{duration:500,easing:'easeOutQuart'},
+      plugins:{
+        legend:{
+          display:circ||radar||datasets.length>1,
+          position:circ?'right':'top'
+        }
+      },
+      scales: circ ? {} : radar ? {
+        r:{beginAtZero:true,ticks:{stepSize:1,display:true,backdropColor:'transparent'},
+           grid:{color:'rgba(0,0,0,0.07)'},
+           pointLabels:{font:{size:11,weight:'500'},color:'#4E6278'}}
+      } : {
+        x:{grid:{color:'rgba(0,0,0,0.05)',display:!isH},ticks:{font:{size:11},maxRotation:30}},
+        y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.05)',display:!!isH},
+           ticks:{font:{size:11},...(extra&&extra.yTick?{callback:extra.yTick}:{})}}
+      },
+      ...(extra&&extra.tooltip?{plugins:{legend:CI[canvasId]?undefined:{display:circ||radar},tooltip:{callbacks:{label:extra.tooltip}}}}:{})
+    }
+  });
+}
+
+/* ── DATA SOURCES ── */
+function dTotal(){
+  const f=filtered();
+  const cos=[...new Set(f.map(j=>j.company))];
+  return {labels:cos, vals:cos.map(c=>f.filter(j=>j.company===c).length), colors:PAL};
+}
+function dInterviews(){
+  const f=filtered().filter(j=>j.status==='Interview');
+  const cos=[...new Set(f.map(j=>j.company))];
+  if(!cos.length) return {labels:['No interviews'],vals:[0],colors:['#FB923C']};
+  return {labels:cos, vals:cos.map(c=>f.filter(j=>j.company===c).length), colors:Array(cos.length).fill('#FB923C')};
+}
+function dOffers(){
+  const f=filtered().filter(j=>j.status==='Offer');
+  const cos=[...new Set(f.map(j=>j.company))];
+  if(!cos.length) return {labels:['No offers'],vals:[0],colors:['#A855F7']};
+  return {labels:cos, vals:cos.map(c=>f.filter(j=>j.company===c).length), colors:Array(cos.length).fill('#A855F7')};
+}
+function dScore(){
+  const f=filtered().filter(j=>j.score!==null);
+  const cos=[...new Set(f.map(j=>j.company))];
+  if(!cos.length) return {labels:['No scores'],vals:[0],colors:['#22C55E']};
+  const avgs=cos.map(c=>{
+    const js=f.filter(j=>j.company===c);
+    return Math.round(js.reduce((a,j)=>a+j.score,0)/js.length);
+  });
+  return {labels:cos, vals:avgs, colors:avgs.map(v=>v>=80?'#22C55E':v>=60?'#FB923C':'#EF4444')};
+}
+function dSalary(){
+  const f=filtered().filter(j=>toNum(j.salary)>0);
+  const sorted=[...f].sort((a,b)=>toNum(b.salary)-toNum(a.salary));
+  if(!sorted.length) return {labels:['No salary data'],vals:[0],colors:PAL,nums:[0]};
+  const nums=sorted.map(j=>toNum(j.salary));
+  return {labels:sorted.map(j=>j.company), vals:nums, colors:PAL, nums};
+}
+function dStatus(){
+  const f=filtered();
+  const sts=['Wishlist','Applied','Interview','Offer','Rejected'];
+  return {labels:sts, vals:sts.map(s=>f.filter(j=>j.status===s).length), colors:sts.map(s=>SC[s])};
+}
+function dRole(){
+  const f=filtered();
+  const roles=[...new Set(f.map(j=>j.role))];
+  return {labels:roles.length?roles:['No roles'], vals:roles.length?roles.map(r=>f.filter(j=>j.role===r).length):[0], colors:PAL};
+}
+
+/* ── META MAP ── */
+const META = {
+  total:      {title:'Total Jobs',      sub:'All jobs by company'},
+  interviews: {title:'Interviews',      sub:'Interview-stage jobs by company'},
+  offers:     {title:'Offers',          sub:'Offer-stage jobs by company'},
+  score:      {title:'Avg AI Score',    sub:'Average match score per company'},
+  salary:     {title:'Highest Salary',  sub:'Salary per job in ₹ (sorted high to low)'},
+  status:     {title:'Status',          sub:'Distribution across pipeline stages'},
+  role:       {title:'Role',            sub:'Job count per role title'},
+};
+
+/* ── DRAW MAIN (single unified chart) ── */
+function drawMain(){
+  const metric = document.getElementById('s-metric').value;
+  const type   = document.getElementById('s-type').value;
+
+  /* update card title + subtitle */
+  document.getElementById('chart-title').textContent = META[metric].title;
+  document.getElementById('chart-sub').textContent   = META[metric].sub;
+
+  const circ  = ['doughnut','pie','polarArea'].includes(type);
+  const radar = type==='radar';
+  const isH   = type==='hbar';
+
+  const src = {
+    total:      dTotal,
+    interviews: dInterviews,
+    offers:     dOffers,
+    score:      dScore,
+    salary:     dSalary,
+    status:     dStatus,
+    role:       dRole
+  }[metric]();
+
+  const {labels, vals, colors} = src;
+  const canvasId = 'c-main';
+
+  let ds;
+  if(circ){
+    ds=[{data:vals,backgroundColor:colors.map(c=>c+'CC'),borderColor:colors,borderWidth:2,hoverOffset:8}];
+  } else if(radar){
+    ds=[{label:META[metric].title,data:vals,backgroundColor:'rgba(27,95,232,0.12)',borderColor:'#1B5FE8',pointBackgroundColor:colors,pointRadius:4,fill:true}];
+  } else {
+    ds=[{
+      label:META[metric].title,data:vals,
+      backgroundColor:vals.map((_,i)=>(colors[i]||col(i))+'CC'),
+      borderColor:vals.map((_,i)=>colors[i]||col(i)),
+      borderWidth:type==='line'?2:0,
+      borderRadius:(type==='bar'||isH)?6:0,
+      borderSkipped:false,
+      tension:0.4,fill:type==='line',
+      pointBackgroundColor:'#1B5FE8',pointRadius:type==='line'?4:0,
+    }];
+  }
+
+  const extra = metric==='salary' ? {
+    yTick: v=>fmtL(v),
+    tooltip: ctx=>' '+fmtFull(ctx.parsed.y??ctx.parsed.r??ctx.raw)
+  } : metric==='score' ? {
+    tooltip: ctx=>' Score: '+(ctx.parsed.y??ctx.parsed.r??ctx.raw)+'/100'
+  } : null;
+
+  mk(canvasId, type, labels, ds, extra);
+
+  if(extra && CI[canvasId]){
+    CI[canvasId].options.plugins.tooltip = {
+      padding:10, cornerRadius:8, backgroundColor:'#0C1A2E',
+      callbacks:{ label: extra.tooltip }
+    };
+    CI[canvasId].update('none');
+  }
+}
+
+/* ── REFRESH ALL ── */
+function refreshAll(){
+  updateKPIs();
+  drawMain();
+}
+
+/* ── MODAL ── */
+function openModal(){
+  document.getElementById('m-dt').value=new Date().toISOString().split('T')[0];
+  document.getElementById('mbg').classList.add('open');
+}
+function closeModal(){ document.getElementById('mbg').classList.remove('open'); }
+
+function saveJob(){
+  const co=document.getElementById('m-co').value.trim();
+  const ro=document.getElementById('m-ro').value.trim();
+  if(!co||!ro){toast('Company and Role are required','warning');return;}
+  const sc=document.getElementById('m-sc').value;
+  const score=sc?Math.min(100,Math.max(0,parseInt(sc))):null;
+  const salRaw=document.getElementById('m-sa').value.replace(/[^0-9]/g,'');
+  const salary=salRaw||'Undisclosed';
+  jobs.unshift({id:Date.now(),company:co,role:ro,status:document.getElementById('m-st').value,salary,date:document.getElementById('m-dt').value||new Date().toISOString().split('T')[0],score});
+  ['m-co','m-ro','m-sa','m-sc'].forEach(id=>document.getElementById(id).value='');
+  closeModal();
+  refreshAll();
+  toast('Added: '+co+' — '+ro,'success');
+}
+
+/* ── SAMPLE DATA ── */
+function loadSamples(){
+  const s=[
+    {id:Date.now()+1, company:'Google',    role:'Staff Engineer',      status:'Interview',salary:'25000000',date:'2026-01-10',score:88},
+    {id:Date.now()+2, company:'Microsoft', role:'Principal Engineer',  status:'Applied',  salary:'20000000',date:'2026-01-22',score:79},
+    {id:Date.now()+3, company:'Amazon',    role:'SDE II',              status:'Offer',    salary:'18000000',date:'2026-02-03',score:92},
+    {id:Date.now()+4, company:'Flipkart',  role:'Senior SDE',          status:'Rejected', salary:'12000000',date:'2026-02-14',score:65},
+    {id:Date.now()+5, company:'Swiggy',    role:'Backend Engineer',    status:'Applied',  salary:'9000000', date:'2026-02-28',score:70},
+    {id:Date.now()+6, company:'Razorpay',  role:'Frontend Lead',       status:'Wishlist', salary:'11000000',date:'2026-03-01',score:null},
+    {id:Date.now()+7, company:'Zomato',    role:'Engineering Manager', status:'Interview',salary:'16000000',date:'2026-03-08',score:83},
+    {id:Date.now()+8, company:'PhonePe',   role:'ML Engineer',         status:'Applied',  salary:'14000000',date:'2026-03-10',score:77},
+    {id:Date.now()+9, company:'CRED',      role:'Product Engineer',    status:'Offer',    salary:'13000000',date:'2026-03-12',score:89},
+    {id:Date.now()+10,company:'Meesho',    role:'Data Engineer',       status:'Rejected', salary:'8000000', date:'2026-01-05',score:58},
+  ];
+  jobs=[...s,...jobs];
+  refreshAll();
+  toast('10 sample jobs loaded','success');
+}
+
+function clearJobs(){
+  if(!confirm('Clear all job data?')) return;
+  jobs=[];
+  refreshAll();
+  toast('All jobs cleared','error');
+}
+
+/* ── TOAST ── */
+function toast(msg,type='info'){
+  const c=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className='toast'+(type!=='info'?' '+type:'');
+  const ic={success:'✓',error:'✕',warning:'⚠',info:'ℹ'};
+  t.textContent=(ic[type]||'ℹ')+'  '+msg;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.animation='tOut .3s ease forwards';setTimeout(()=>t.remove(),300);},3000);
+}
+
+/* ── KEYBOARD ── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeModal();
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openModal();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='r'){e.preventDefault();refreshAll();toast('Chart refreshed','success');}
+});
+
+/* ── INIT ── */
+(function(){
+  refreshAll();
+  setTimeout(()=>toast('Select a metric and chart type from the dropdowns · Ctrl+N = New Job','info'),700);
+})();
+</script>
+</body>
+</html>

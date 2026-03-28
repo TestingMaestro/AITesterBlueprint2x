@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobTracker AI — Enterprise Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════ */
+:root {
+  --bg-base:           #EEF2F7;
+  --bg-surface:        #FFFFFF;
+  --bg-sidebar:        #0B1829;
+  --bg-sidebar-item:   rgba(255,255,255,0.06);
+  --bg-sidebar-active: #1A3A5C;
+  --bg-sidebar-hover:  rgba(255,255,255,0.08);
+
+  --accent:            #1B5FE8;
+  --accent-hover:      #1449C0;
+  --accent-light:      #EAF0FD;
+  --accent-dim:        rgba(27,95,232,0.12);
+
+  --text-primary:      #0C1A2E;
+  --text-secondary:    #4E6278;
+  --text-muted:        #8A9EAF;
+  --text-white:        #FFFFFF;
+  --text-sidebar:      #7A9AB8;
+  --text-sidebar-act:  #FFFFFF;
+
+  --border:            #DDE4EE;
+  --border-strong:     #C4CFDC;
+
+  --green:  #16A34A; --green-bg:  #F0FDF4; --green-dot:  #22C55E;
+  --blue:   #1D4ED8; --blue-bg:   #EFF6FF; --blue-dot:   #3B82F6;
+  --orange: #C2410C; --orange-bg: #FFF7ED; --orange-dot: #FB923C;
+  --purple: #7E22CE; --purple-bg: #FAF5FF; --purple-dot: #A855F7;
+  --red:    #DC2626; --red-bg:    #FEF2F2; --red-dot:    #EF4444;
+
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.09), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.06);
+
+  --r-sm: 5px; --r-md: 8px; --r-lg: 12px; --r-xl: 16px; --r-2xl: 20px;
+  --sidebar-w: 224px;
+  --topbar-h:  56px;
+  --copilot-w: 308px;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+  --transition: 0.15s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: var(--font); background: var(--bg-base); color: var(--text-primary); font-size: 13.5px; line-height: 1.5; display: flex; flex-direction: column; }
+button, input, select, textarea { font-family: var(--font); }
+a { text-decoration: none; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 10px; }
+
+/* ═══════════════════════════════════════════════════════════
+   TOP BAR
+═══════════════════════════════════════════════════════════ */
+.topbar {
+  height: var(--topbar-h); min-height: var(--topbar-h);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px 0 0;
+  box-shadow: var(--shadow-xs);
+  z-index: 200; flex-shrink: 0;
+}
+.brand {
+  width: var(--sidebar-w); min-width: var(--sidebar-w);
+  display: flex; align-items: center; gap: 9px;
+  padding: 0 16px; height: 100%;
+  border-right: 1px solid var(--border);
+}
+.brand-logo {
+  width: 30px; height: 30px; border-radius: var(--r-md);
+  background: var(--accent); display: flex; align-items: center;
+  justify-content: center; font-weight: 700; font-size: 13px; color: #fff;
+  letter-spacing: -0.5px; flex-shrink: 0;
+}
+.brand-text { font-size: 14.5px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.4px; }
+.brand-text em { color: var(--accent); font-style: normal; }
+
+.search-wrap {
+  flex: 1; max-width: 400px; position: relative;
+}
+.search-wrap svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
+#globalSearch {
+  width: 100%; height: 34px;
+  border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  background: var(--bg-base); padding: 0 12px 0 33px;
+  font-size: 13px; color: var(--text-primary); outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+#globalSearch:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-dim); }
+#globalSearch::placeholder { color: var(--text-muted); }
+#searchClear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  display: none; background: var(--text-muted); border: none;
+  color: #fff; width: 16px; height: 16px; border-radius: 50%;
+  font-size: 10px; cursor: pointer; align-items: center; justify-content: center;
+}
+#searchClear.visible { display: flex; }
+
+.view-tabs {
+  display: flex; background: var(--bg-base); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 3px; gap: 2px;
+}
+.vtab {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: var(--r-sm); border: none;
+  background: transparent; font-size: 12.5px; font-weight: 500;
+  color: var(--text-secondary); cursor: pointer;
+  transition: all var(--transition);
+}
+.vtab.active { background: var(--bg-surface); color: var(--text-primary); box-shadow: var(--shadow-xs); }
+.vtab:hover:not(.active) { color: var(--text-primary); background: rgba(0,0,0,0.04); }
+
+.spacer { flex: 1; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+
+.icon-btn {
+  width: 34px; height: 34px; border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--bg-surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-secondary); position: relative;
+  transition: all var(--transition);
+}
+.icon-btn:hover { border-color: var(--border-strong); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+.notif-badge {
+  position: absolute; top: 5px; right: 5px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #EF4444; border: 1.5px solid var(--bg-surface);
+}
+.notif-count {
+  position: absolute; top: -4px; right: -4px;
+  min-width: 16px; height: 16px; border-radius: 8px;
+  background: #EF4444; border: 1.5px solid var(--bg-surface);
+  font-size: 9px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; justify-content: center; padding: 0 3px;
+}
+
+.copilot-toggle {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 13px; height: 34px; border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--bg-surface);
+  font-size: 13px; font-weight: 500; color: var(--text-primary);
+  cursor: pointer; transition: all var(--transition);
+}
+.copilot-toggle:hover { border-color: var(--accent); color: var(--accent); }
+.copilot-toggle.panel-open { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.pulse-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #22C55E;
+  box-shadow: 0 0 0 0 rgba(34,197,94,0.4);
+  animation: pulse 2.2s infinite;
+}
+@keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,0.4)} 50%{box-shadow:0 0 0 6px rgba(34,197,94,0)} }
+
+.btn-primary {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0 14px; height: 34px; border-radius: var(--r-md);
+  border: none; background: var(--accent); color: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  box-shadow: 0 2px 8px rgba(27,95,232,0.32);
+  transition: background var(--transition), box-shadow var(--transition), transform 0.1s;
+}
+.btn-primary:hover { background: var(--accent-hover); box-shadow: 0 4px 16px rgba(27,95,232,0.40); }
+.btn-primary:active { transform: scale(0.98); }
+
+/* ═══════════════════════════════════════════════════════════
+   BODY LAYOUT
+═══════════════════════════════════════════════════════════ */
+.app-body { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+
+/* ═══════════════════════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════════════════════ */
+.sidebar {
+  width: var(--sidebar-w); min-width: var(--sidebar-w);
+  background: var(--bg-sidebar);
+  display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+  transition: width 0.25s ease, min-width 0.25s ease;
+}
+.sidebar.collapsed { width: 56px; min-width: 56px; }
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .sidebar-section-label,
+.sidebar.collapsed .stat-card-text,
+.sidebar.collapsed .filter-section,
+.sidebar.collapsed .sidebar-footer-text { display: none; }
+.sidebar.collapsed .nav-item { justify-content: center; padding: 9px; }
+.sidebar.collapsed .stat-card { justify-content: center; }
+
+.sidebar-inner { padding: 12px 0 0; display: flex; flex-direction: column; height: 100%; }
+
+.sidebar-section-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.9px;
+  text-transform: uppercase; color: #3A5675;
+  padding: 14px 16px 5px;
+}
+
+.nav-list { display: flex; flex-direction: column; gap: 1px; padding: 0 8px; }
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 10px; border-radius: var(--r-md);
+  cursor: pointer; color: var(--text-sidebar);
+  font-size: 13px; font-weight: 500;
+  transition: all var(--transition); white-space: nowrap;
+}
+.nav-item:hover { background: var(--bg-sidebar-hover); color: var(--text-sidebar-act); }
+.nav-item.active { background: var(--bg-sidebar-active); color: var(--text-sidebar-act); }
+.nav-item svg { flex-shrink: 0; }
+.nav-badge {
+  margin-left: auto; min-width: 18px; height: 18px; border-radius: 9px;
+  background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.7);
+  font-size: 10px; font-weight: 600; display: flex; align-items: center;
+  justify-content: center; padding: 0 5px;
+}
+
+.sidebar-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 10px 14px; }
+
+/* stat cards in sidebar */
+.stat-cards-wrap { padding: 4px 10px; display: flex; flex-direction: column; gap: 3px; }
+.stat-card {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 10px; border-radius: var(--r-md);
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.06);
+  cursor: pointer; transition: background var(--transition);
+}
+.stat-card:hover { background: rgba(255,255,255,0.07); }
+.stat-card-text { display: flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--text-sidebar); }
+.sdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.stat-pill {
+  font-family: var(--mono); font-size: 11.5px; font-weight: 500;
+  color: #fff; background: rgba(255,255,255,0.1);
+  padding: 1px 8px; border-radius: 20px; min-width: 22px; text-align: center;
+}
+
+/* filter section */
+.filter-section { padding: 4px 10px 8px; }
+.filter-block { margin-bottom: 10px; }
+.filter-lbl { font-size: 10px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #3A5675; margin-bottom: 5px; }
+.filter-select {
+  width: 100%; padding: 6px 28px 6px 10px;
+  background: rgba(255,255,255,0.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%234A6280' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E") no-repeat right 8px center;
+  border: 1px solid rgba(255,255,255,0.09); border-radius: var(--r-md);
+  color: var(--text-sidebar); font-size: 12.5px; outline: none;
+  appearance: none; cursor: pointer;
+  transition: border-color var(--transition);
+}
+.filter-select:focus { border-color: rgba(27,95,232,0.5); }
+.filter-select option { background: #1a2d45; color: #c8d8e8; }
+
+.company-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip {
+  padding: 3px 9px; border-radius: 20px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09);
+  color: var(--text-sidebar); font-size: 11.5px;
+  cursor: pointer; transition: all var(--transition); white-space: nowrap;
+}
+.chip:hover { background: rgba(27,95,232,0.22); border-color: rgba(27,95,232,0.5); color: #fff; }
+.chip.active { background: rgba(27,95,232,0.28); border-color: var(--accent); color: #fff; }
+
+.sidebar-footer { margin-top: auto; padding: 8px 8px 12px; border-top: 1px solid rgba(255,255,255,0.06); }
+.footer-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px; border-radius: var(--r-md);
+  color: var(--text-sidebar); font-size: 12.5px; cursor: pointer;
+  transition: all var(--transition);
+}
+.footer-item:hover { background: var(--bg-sidebar-hover); color: #fff; }
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════════════════════ */
+.main { flex: 1; overflow-y: auto; padding: 22px 24px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+
+.page-head { display: flex; align-items: flex-start; justify-content: space-between; }
+.page-title { font-size: 22px; font-weight: 700; letter-spacing: -0.6px; color: var(--text-primary); }
+.page-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+
+/* KPI row */
+.kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+.kpi {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px 18px;
+  box-shadow: var(--shadow-sm); cursor: default;
+  transition: box-shadow 0.2s, transform 0.2s;
+  animation: fadeUp 0.35s ease both;
+}
+.kpi:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.kpi:nth-child(1){animation-delay:0.00s}
+.kpi:nth-child(2){animation-delay:0.05s}
+.kpi:nth-child(3){animation-delay:0.10s}
+.kpi:nth-child(4){animation-delay:0.15s}
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.kpi-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.kpi-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
+.kpi-icon { width: 30px; height: 30px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; }
+.kpi-value { font-family: var(--mono); font-size: 28px; font-weight: 600; letter-spacing: -1.5px; color: var(--text-primary); }
+.kpi-foot { font-size: 11.5px; color: var(--text-muted); margin-top: 5px; }
+.kpi-foot .up { color: var(--green); font-weight: 600; }
+.kpi-foot .neu { color: var(--text-muted); }
+
+/* ═══════════════════════════════════════════════════════════
+   TABLE CARD
+═══════════════════════════════════════════════════════════ */
+.table-card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); box-shadow: var(--shadow-sm); overflow: hidden;
+  animation: fadeUp 0.35s ease 0.20s both;
+}
+.table-toolbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 13px 18px; border-bottom: 1px solid var(--border);
+}
+.table-title { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.count-pill { font-size: 11.5px; font-weight: 700; background: var(--accent-light); color: var(--accent); padding: 2px 9px; border-radius: 20px; }
+.toolbar-spacer { flex: 1; }
+
+.tool-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 5px 11px; border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--bg-surface);
+  font-size: 12px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; transition: all var(--transition);
+}
+.tool-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.tool-btn.danger:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+
+/* table */
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 720px; }
+thead th {
+  padding: 9px 16px; text-align: left;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.6px;
+  text-transform: uppercase; color: var(--text-muted);
+  background: var(--bg-base); border-bottom: 1px solid var(--border);
+  white-space: nowrap; user-select: none; cursor: pointer;
+  transition: color var(--transition);
+}
+thead th:hover { color: var(--accent); }
+thead th.sort-asc::after { content: ' ↑'; color: var(--accent); font-size: 10px; }
+thead th.sort-desc::after { content: ' ↓'; color: var(--accent); font-size: 10px; }
+thead th:last-child { cursor: default; }
+thead th:last-child:hover { color: var(--text-muted); }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background var(--transition);
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: #F6F9FD; }
+tbody tr.selected { background: var(--accent-light); }
+td { padding: 12px 16px; vertical-align: middle; }
+
+.cb { width: 15px; height: 15px; cursor: pointer; accent-color: var(--accent); }
+
+.company-cell { display: flex; align-items: center; gap: 10px; }
+.avatar {
+  width: 32px; height: 32px; border-radius: var(--r-md);
+  font-weight: 700; font-size: 12px; color: #fff;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.co-name { font-weight: 600; font-size: 13.5px; color: var(--text-primary); }
+.co-domain { font-size: 11px; color: var(--text-muted); }
+
+.role-name { font-weight: 500; font-size: 13.5px; }
+.role-dept { font-size: 11px; color: var(--text-muted); }
+
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.b-wishlist  { background: var(--blue-bg);   color: var(--blue);   } .b-wishlist .badge-dot  { background: var(--blue-dot); }
+.b-applied   { background: var(--green-bg);  color: var(--green);  } .b-applied .badge-dot   { background: var(--green-dot); }
+.b-interview { background: var(--orange-bg); color: var(--orange); } .b-interview .badge-dot { background: var(--orange-dot); }
+.b-offer     { background: var(--purple-bg); color: var(--purple); } .b-offer .badge-dot     { background: var(--purple-dot); }
+.b-rejected  { background: var(--red-bg);    color: var(--red);    } .b-rejected .badge-dot  { background: var(--red-dot); }
+
+.sal-val { font-family: var(--mono); font-size: 13px; color: var(--text-primary); }
+.sal-na { font-size: 12px; color: var(--text-muted); }
+
+.date-val { font-size: 12.5px; color: var(--text-secondary); white-space: nowrap; }
+.date-ago { font-size: 11px; color: var(--text-muted); }
+.date-urgent { color: var(--orange); }
+
+.score-wrap { display: flex; align-items: center; gap: 8px; }
+.score-track { width: 54px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+.score-fill { height: 100%; border-radius: 3px; }
+.score-num { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--text-secondary); min-width: 26px; }
+
+.row-actions { display: flex; align-items: center; gap: 5px; opacity: 0; transition: opacity var(--transition); }
+tbody tr:hover .row-actions { opacity: 1; }
+.row-btn {
+  width: 28px; height: 28px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: var(--bg-surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-muted); transition: all var(--transition);
+}
+.row-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+.row-btn.del:hover { border-color: var(--red); color: var(--red); background: var(--red-bg); }
+
+/* empty state */
+.empty-state {
+  text-align: center; padding: 52px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.empty-icon { width: 44px; height: 44px; background: var(--bg-base); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+.empty-title { font-size: 14px; font-weight: 600; color: var(--text-secondary); }
+.empty-sub { font-size: 12.5px; color: var(--text-muted); }
+.empty-cta { margin-top: 4px; font-size: 12.5px; color: var(--accent); cursor: pointer; font-weight: 600; }
+.empty-cta:hover { text-decoration: underline; }
+
+/* ═══════════════════════════════════════════════════════════
+   VIEW PANELS (Kanban / Timeline)
+═══════════════════════════════════════════════════════════ */
+#kanban-view, #timeline-view { display: none; }
+#kanban-view.active, #timeline-view.active { display: block; animation: fadeUp 0.3s ease; }
+
+.kanban-board { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; }
+.kanban-col {
+  min-width: 200px; flex: 1;
+  background: var(--bg-base); border-radius: var(--r-lg); border: 1px solid var(--border); overflow: hidden;
+}
+.kanban-col-head {
+  padding: 11px 14px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border); background: var(--bg-surface);
+}
+.kanban-col-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.kanban-col-count { font-size: 11px; font-weight: 700; background: var(--border); color: var(--text-secondary); padding: 1px 7px; border-radius: 20px; }
+.kanban-cards { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 80px; }
+.kanban-card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--r-md); padding: 11px 13px;
+  box-shadow: var(--shadow-xs); cursor: pointer;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.kanban-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.kc-co { font-weight: 600; font-size: 13px; color: var(--text-primary); }
+.kc-role { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.kc-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.kc-date { font-size: 11px; color: var(--text-muted); }
+
+.timeline-wrap { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+.timeline-head { padding: 13px 18px; border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 600; }
+.timeline-body { padding: 16px 18px; }
+.tl-item { display: flex; gap: 14px; margin-bottom: 20px; position: relative; }
+.tl-item:last-child { margin-bottom: 0; }
+.tl-line { position: absolute; left: 13px; top: 26px; bottom: -20px; width: 1px; background: var(--border); }
+.tl-item:last-child .tl-line { display: none; }
+.tl-dot { width: 27px; height: 27px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; z-index:1; }
+.tl-content { flex: 1; }
+.tl-title { font-weight: 600; font-size: 13.5px; }
+.tl-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.tl-date { font-size: 11.5px; color: var(--text-muted); margin-top: 4px; font-family: var(--mono); }
+
+/* ═══════════════════════════════════════════════════════════
+   AI COPILOT PANEL
+═══════════════════════════════════════════════════════════ */
+.copilot-panel {
+  width: var(--copilot-w); min-width: var(--copilot-w);
+  background: var(--bg-surface); border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+  transition: width 0.25s ease, min-width 0.25s ease;
+}
+.copilot-panel.hidden { width: 0; min-width: 0; border-left: none; }
+
+.cp-header {
+  padding: 13px 15px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.cp-avatar {
+  width: 34px; height: 34px; border-radius: var(--r-md); flex-shrink: 0;
+  background: linear-gradient(135deg, #1B5FE8, #7C3AED);
+  display: flex; align-items: center; justify-content: center;
+}
+.cp-title { font-size: 13.5px; font-weight: 600; }
+.cp-status { font-size: 11.5px; color: var(--green); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+.cp-close { margin-left: auto; width: 26px; height: 26px; border-radius: var(--r-sm); border: 1px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all var(--transition); }
+.cp-close:hover { background: var(--bg-base); color: var(--text-primary); }
+
+.cp-msgs { flex: 1; overflow-y: auto; padding: 13px; display: flex; flex-direction: column; gap: 10px; }
+.cp-bubble {
+  background: var(--bg-base); border: 1px solid var(--border);
+  border-radius: var(--r-lg); border-top-left-radius: 4px;
+  padding: 12px 14px; font-size: 13px; line-height: 1.55;
+}
+.cp-user-bubble {
+  background: var(--accent); color: #fff;
+  border-radius: var(--r-lg); border-bottom-right-radius: 4px;
+  padding: 10px 14px; font-size: 13px; line-height: 1.5;
+  align-self: flex-end; max-width: 90%;
+}
+.cp-ai-bubble {
+  background: var(--bg-base); border: 1px solid var(--border);
+  border-radius: var(--r-lg); border-top-left-radius: 4px;
+  padding: 12px 14px; font-size: 13px; line-height: 1.55;
+  max-width: 100%;
+}
+.msg-tag { font-size: 10.5px; font-weight: 700; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+.msg-tag.health { color: #0369A1; }
+.msg-tag.action { color: #B45309; }
+.msg-tag.tip    { color: #7C3AED; }
+.msg-body { font-size: 12.5px; color: var(--text-secondary); }
+.msg-hl { font-weight: 600; color: var(--text-primary); }
+.cp-section { margin-bottom: 9px; }
+.cp-section:last-child { margin-bottom: 0; }
+
+.cp-typing { display: flex; align-items: center; gap: 4px; padding: 10px 14px; }
+.cp-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); animation: blink 1.4s infinite; }
+.cp-typing span:nth-child(2) { animation-delay: 0.2s; }
+.cp-typing span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0.3} 40%{opacity:1} }
+
+.qa-section { padding: 12px 15px; border-top: 1px solid var(--border); }
+.qa-label { font-size: 10px; font-weight: 700; letter-spacing: 0.7px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 7px; }
+.qa-grid { display: flex; flex-direction: column; gap: 4px; }
+.qa-btn {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 11px; border-radius: var(--r-md);
+  border: 1px solid var(--border); background: var(--bg-surface);
+  font-size: 12.5px; font-weight: 500; color: var(--text-secondary);
+  cursor: pointer; transition: all var(--transition); text-align: left;
+}
+.qa-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+.cp-input-row { padding: 11px 13px; border-top: 1px solid var(--border); display: flex; gap: 7px; }
+#copilotInput {
+  flex: 1; height: 36px;
+  border: 1px solid var(--border-strong); border-radius: var(--r-md);
+  padding: 0 12px; font-size: 13px; color: var(--text-primary); background: var(--bg-base);
+  outline: none; transition: border-color var(--transition), box-shadow var(--transition);
+}
+#copilotInput:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-dim); }
+#copilotInput::placeholder { color: var(--text-muted); }
+.cp-send {
+  width: 36px; height: 36px; border-radius: var(--r-md);
+  background: var(--accent); border: none; color: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background var(--transition);
+}
+.cp-send:hover { background: var(--accent-hover); }
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════════════════ */
+.overlay {
+  display: none; position: fixed; inset: 0; z-index: 1000;
+  background: rgba(11,24,41,0.5); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--bg-surface); border-radius: var(--r-2xl);
+  width: 500px; max-width: 96vw; max-height: 92vh; overflow-y: auto;
+  box-shadow: var(--shadow-lg); padding: 24px;
+  animation: modalPop 0.22s ease;
+}
+@keyframes modalPop { from{opacity:0;transform:scale(0.95) translateY(10px)} to{opacity:1;transform:scale(1) translateY(0)} }
+.modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-title { font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+.modal-close { width: 28px; height: 28px; border-radius: var(--r-sm); border: 1px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all var(--transition); }
+.modal-close:hover { background: var(--bg-base); color: var(--text-primary); }
+
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fg { margin-bottom: 13px; }
+.fl { display: block; font-size: 11.5px; font-weight: 700; color: var(--text-secondary); margin-bottom: 5px; letter-spacing: 0.2px; }
+.fl .req { color: #EF4444; }
+.fi, .fs, .fta {
+  width: 100%; height: 38px; padding: 0 12px;
+  border: 1.5px solid var(--border-strong); border-radius: var(--r-md);
+  background: var(--bg-base); font-size: 13.5px; color: var(--text-primary);
+  outline: none; transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+  appearance: none;
+}
+.fi:focus, .fs:focus, .fta:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px var(--accent-dim); }
+.fi.error, .fs.error { border-color: #EF4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+.fi::placeholder { color: var(--text-muted); }
+.fta { height: auto; resize: vertical; padding: 9px 12px; min-height: 72px; }
+.fs { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='%238A9EAF' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+.err-msg { font-size: 11px; color: #EF4444; margin-top: 4px; display: none; }
+.err-msg.show { display: block; }
+
+.modal-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+.btn-sec { padding: 0 16px; height: 36px; border-radius: var(--r-md); border: 1px solid var(--border); background: transparent; font-size: 13.5px; font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all var(--transition); }
+.btn-sec:hover { background: var(--bg-base); color: var(--text-primary); }
+.btn-prim { padding: 0 18px; height: 36px; border-radius: var(--r-md); border: none; background: var(--accent); font-size: 13.5px; font-weight: 600; color: #fff; cursor: pointer; transition: background var(--transition); }
+.btn-prim:hover { background: var(--accent-hover); }
+
+/* detail modal */
+.detail-modal { width: 540px; }
+.dm-header { display: flex; align-items: center; gap: 13px; padding-bottom: 18px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+.dm-avatar { width: 46px; height: 46px; border-radius: var(--r-lg); font-weight: 700; font-size: 18px; color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dm-co { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
+.dm-role { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.dm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; margin-bottom: 16px; }
+.dm-field { background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--r-md); padding: 10px 14px; }
+.dm-field-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 4px; }
+.dm-field-value { font-size: 13.5px; font-weight: 500; color: var(--text-primary); }
+.dm-notes { background: var(--bg-base); border: 1px solid var(--border); border-radius: var(--r-md); padding: 12px 14px; }
+.dm-notes-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 6px; }
+.dm-notes-text { font-size: 13px; color: var(--text-secondary); line-height: 1.55; }
+
+/* notification panel */
+.notif-panel {
+  position: absolute; top: calc(var(--topbar-h) + 8px); right: 16px;
+  width: 320px; background: var(--bg-surface);
+  border: 1px solid var(--border); border-radius: var(--r-xl);
+  box-shadow: var(--shadow-lg); z-index: 500; overflow: hidden;
+  display: none; animation: modalPop 0.2s ease;
+}
+.notif-panel.open { display: block; }
+.np-head { padding: 13px 15px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.np-title { font-size: 13.5px; font-weight: 700; }
+.np-clear { font-size: 12px; color: var(--accent); cursor: pointer; font-weight: 500; }
+.np-clear:hover { text-decoration: underline; }
+.notif-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 15px; border-bottom: 1px solid var(--border); transition: background var(--transition); cursor: pointer; }
+.notif-item:last-child { border-bottom: none; }
+.notif-item:hover { background: var(--bg-base); }
+.notif-item.unread { background: var(--accent-light); }
+.notif-item.unread:hover { background: #dce9fb; }
+.ni-icon { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.ni-body { flex: 1; min-width: 0; }
+.ni-text { font-size: 12.5px; color: var(--text-primary); line-height: 1.45; }
+.ni-time { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* settings panel */
+.settings-panel {
+  position: fixed; inset: 0; z-index: 900; display: none;
+  align-items: flex-end; justify-content: flex-end;
+}
+.settings-panel.open { display: flex; }
+.settings-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.3); }
+.settings-drawer {
+  position: relative; z-index: 1;
+  width: 380px; max-width: 100vw; height: 100%;
+  background: var(--bg-surface); border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-lg); overflow-y: auto; padding: 24px;
+  animation: slideIn 0.25s ease;
+}
+@keyframes slideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+.sd-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.sd-title { font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
+.sd-close { width: 30px; height: 30px; border-radius: var(--r-md); border: 1px solid var(--border); background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+.sd-close:hover { background: var(--bg-base); color: var(--text-primary); }
+.sd-section { margin-bottom: 22px; }
+.sd-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: var(--text-muted); margin-bottom: 10px; }
+.toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.toggle-row:last-child { border-bottom: none; }
+.toggle-label { font-size: 13.5px; color: var(--text-primary); }
+.toggle-sub { font-size: 11.5px; color: var(--text-muted); }
+.toggle { position: relative; display: inline-block; width: 36px; height: 20px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; }
+.toggle-slider { position: absolute; inset: 0; border-radius: 20px; background: var(--border-strong); cursor: pointer; transition: background 0.2s; }
+.toggle-slider::before { content:''; position:absolute; width:16px; height:16px; left:2px; bottom:2px; background:#fff; border-radius:50%; transition:transform 0.2s; }
+.toggle input:checked + .toggle-slider { background: var(--accent); }
+.toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+#toasts { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px; border-radius: var(--r-lg);
+  background: var(--text-primary); color: #fff;
+  font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-lg); pointer-events: all;
+  max-width: 300px;
+  animation: toastIn 0.25s ease;
+}
+.toast.success { background: #15803D; }
+.toast.error   { background: #DC2626; }
+.toast.warning { background: #B45309; }
+@keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+@keyframes toastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(20px)} }
+</style>
+</head>
+<body>
+
+<!-- ══ TOP BAR ══════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-logo">JT</div>
+    <div class="brand-text">JobTracker<em>AI</em></div>
+  </div>
+
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="globalSearch" type="text" placeholder="Search companies, roles, status…" oninput="onSearch(this.value)" onkeydown="if(event.key==='Escape'){this.value='';onSearch('');document.getElementById('searchClear').classList.remove('visible')}">
+    <button id="searchClear" onclick="clearSearch()" title="Clear search">✕</button>
+  </div>
+
+  <div class="view-tabs">
+    <button class="vtab active" id="tab-table"    onclick="switchView('table')"   >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18M3 9h18M3 15h18M3 21h18"/></svg>Table
+    </button>
+    <button class="vtab" id="tab-kanban"   onclick="switchView('kanban')"  >
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Kanban
+    </button>
+    <button class="vtab" id="tab-timeline" onclick="switchView('timeline')">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><polyline points="8 8 12 4 16 8"/><polyline points="8 16 12 20 16 16"/></svg>Timeline
+    </button>
+  </div>
+
+  <div class="spacer"></div>
+
+  <div class="topbar-right">
+    <!-- Notifications -->
+    <div class="icon-btn" id="notifBtn" onclick="toggleNotifPanel()" title="Notifications" style="position:relative">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <span class="notif-count" id="notifCount">3</span>
+    </div>
+
+    <!-- Copilot toggle -->
+    <button class="copilot-toggle panel-open" id="copilotToggle" onclick="toggleCopilot()">
+      <span class="pulse-dot"></span> AI Copilot
+    </button>
+
+    <!-- New Job -->
+    <button class="btn-primary" onclick="openModal('add')">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      New Job
+    </button>
+  </div>
+</header>
+
+<!-- notification panel -->
+<div class="notif-panel" id="notifPanel">
+  <div class="np-head">
+    <span class="np-title">Notifications</span>
+    <span class="np-clear" onclick="clearNotifs()">Mark all read</span>
+  </div>
+  <div id="notifList"></div>
+</div>
+
+<!-- ══ BODY ═════════════════════════════════════════════════ -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <div class="sidebar-section-label">Navigation</div>
+      <div class="nav-list">
+        <div class="nav-item active" id="nav-dashboard" onclick="navTo('dashboard')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          <span class="nav-label">Dashboard</span>
+        </div>
+        <div class="nav-item" id="nav-applications" onclick="navTo('applications')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span class="nav-label">Applications</span>
+          <span class="nav-badge" id="nb-applications">5</span>
+        </div>
+        <div class="nav-item" id="nav-interviews" onclick="navTo('interviews')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span class="nav-label">Interviews</span>
+          <span class="nav-badge" id="nb-interviews">1</span>
+        </div>
+        <div class="nav-item" id="nav-documents" onclick="navTo('documents')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          <span class="nav-label">Documents</span>
+        </div>
+      </div>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">Quick Stats</div>
+      <div class="stat-cards-wrap">
+        <div class="stat-card" onclick="filterByStatus('Applied')">
+          <div class="stat-card-text"><span class="sdot" style="background:var(--blue-dot)"></span><span>Applied</span></div>
+          <span class="stat-pill" id="sp-applied">0</span>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('Interview')">
+          <div class="stat-card-text"><span class="sdot" style="background:var(--orange-dot)"></span><span>Interviews</span></div>
+          <span class="stat-pill" id="sp-interviews">0</span>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('Offer')">
+          <div class="stat-card-text"><span class="sdot" style="background:var(--purple-dot)"></span><span>Offers</span></div>
+          <span class="stat-pill" id="sp-offers">0</span>
+        </div>
+        <div class="stat-card" onclick="filterByStatus('Rejected')">
+          <div class="stat-card-text"><span class="sdot" style="background:var(--red-dot)"></span><span>Rejected</span></div>
+          <span class="stat-pill" id="sp-rejected">0</span>
+        </div>
+      </div>
+
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-section-label">Filters</div>
+      <div class="filter-section">
+        <div class="filter-block">
+          <div class="filter-lbl">Sort By</div>
+          <select class="filter-select" id="sortSelect" onchange="applySort()">
+            <option value="">Default</option>
+            <option value="company">Company A–Z</option>
+            <option value="date_desc">Date (Newest)</option>
+            <option value="date_asc">Date (Oldest)</option>
+            <option value="score_desc">AI Score (High)</option>
+            <option value="score_asc">AI Score (Low)</option>
+            <option value="salary">Salary</option>
+          </select>
+        </div>
+        <div class="filter-block">
+          <div class="filter-lbl">Status</div>
+          <select class="filter-select" id="statusFilter" onchange="applyFilters()">
+            <option value="">All Statuses</option>
+            <option value="Wishlist">Wishlist</option>
+            <option value="Applied">Applied</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer">Offer</option>
+            <option value="Rejected">Rejected</option>
+          </select>
+        </div>
+        <div class="filter-block">
+          <div class="filter-lbl">Companies</div>
+          <div class="company-chips" id="companyChips"></div>
+        </div>
+        <div class="filter-block">
+          <div class="filter-lbl" style="margin-bottom:0">
+            <span style="color:var(--accent);cursor:pointer;font-size:11px" onclick="clearAllFilters()">Clear all filters</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="footer-item" onclick="openSettings()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 0-14.14 0M4.93 19.07a10 10 0 0 0 14.14 0M4.93 4.93l.01 0M19.07 19.07l.01 0"/></svg>
+          <span class="sidebar-footer-text">Settings</span>
+        </div>
+        <div class="footer-item" onclick="toggleSidebar()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="collapseIcon"><polyline points="15 18 9 12 15 6"/></svg>
+          <span class="sidebar-footer-text">Collapse</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main" id="mainArea">
+
+    <!-- PAGE HEAD -->
+    <div class="page-head">
+      <div>
+        <div class="page-title" id="pageTitle">Dashboard</div>
+        <div class="page-sub" id="pageSub">Your job search pipeline</div>
+      </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-row" id="kpiRow">
+      <div class="kpi">
+        <div class="kpi-top">
+          <div class="kpi-label">Total Jobs</div>
+          <div class="kpi-icon" style="background:var(--accent-light)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpi-total">0</div>
+        <div class="kpi-foot">In pipeline</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top">
+          <div class="kpi-label">Interviews</div>
+          <div class="kpi-icon" style="background:var(--orange-bg)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpi-interviews">0</div>
+        <div class="kpi-foot kpi-foot-int">Scheduled</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top">
+          <div class="kpi-label">Offers</div>
+          <div class="kpi-icon" style="background:var(--purple-bg)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpi-offers">0</div>
+        <div class="kpi-foot">Received</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-top">
+          <div class="kpi-label">Avg AI Score</div>
+          <div class="kpi-icon" style="background:var(--green-bg)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+        </div>
+        <div class="kpi-value" id="kpi-score">—</div>
+        <div class="kpi-foot">Match score</div>
+      </div>
+    </div>
+
+    <!-- TABLE VIEW -->
+    <div id="table-view">
+      <div class="table-card">
+        <div class="table-toolbar">
+          <span class="table-title">Job Pipeline</span>
+          <span class="count-pill" id="rowCount">0 jobs</span>
+          <div class="toolbar-spacer"></div>
+          <button class="tool-btn" id="bulkDeleteBtn" onclick="bulkDelete()" style="display:none">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+            Delete Selected (<span id="selectedCount">0</span>)
+          </button>
+          <button class="tool-btn" onclick="exportCSV()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export CSV
+          </button>
+          <button class="tool-btn" onclick="toggleColMenu()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            Columns
+          </button>
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:36px;cursor:default"><input type="checkbox" class="cb" id="selectAll" onchange="toggleSelectAll(this.checked)" title="Select all"></th>
+                <th onclick="sortCol('company')">Company</th>
+                <th onclick="sortCol('role')">Role</th>
+                <th onclick="sortCol('status')">Status</th>
+                <th onclick="sortCol('salary')">Salary</th>
+                <th onclick="sortCol('date')">Applied</th>
+                <th onclick="sortCol('score')">AI Score</th>
+                <th style="cursor:default;width:80px">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- KANBAN VIEW -->
+    <div id="kanban-view">
+      <div class="kanban-board" id="kanbanBoard"></div>
+    </div>
+
+    <!-- TIMELINE VIEW -->
+    <div id="timeline-view">
+      <div class="timeline-wrap">
+        <div class="timeline-head">Application Timeline</div>
+        <div class="timeline-body" id="timelineBody"></div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- AI COPILOT PANEL -->
+  <aside class="copilot-panel" id="copilotPanel">
+    <div class="cp-header">
+      <div class="cp-avatar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+      </div>
+      <div>
+        <div class="cp-title">AI Copilot</div>
+        <div class="cp-status"><span class="pulse-dot" style="width:6px;height:6px"></span> Active</div>
+      </div>
+      <button class="cp-close" onclick="toggleCopilot()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="cp-msgs" id="cpMsgs">
+      <div class="cp-bubble">
+        <div class="cp-section">
+          <div class="msg-tag health">📊 Pipeline Health</div>
+          <div class="msg-body">You have <span class="msg-hl" id="cp-active-count">5</span> active applications across <span class="msg-hl" id="cp-co-count">5</span> companies. Strongest opportunity: <span class="msg-hl">Figma</span> (offer stage).</div>
+        </div>
+        <div class="cp-section">
+          <div class="msg-tag action">⚡ Action Needed</div>
+          <div class="msg-body">Your <span class="msg-hl">Vercel</span> application is 4 days old with no response — consider following up today.</div>
+        </div>
+        <div class="cp-section">
+          <div class="msg-tag tip">💡 Tip</div>
+          <div class="msg-body">Your AI match scores suggest emphasizing <span class="msg-hl">React performance optimization</span> in your next cover letter.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="qa-section">
+      <div class="qa-label">Quick Actions</div>
+      <div class="qa-grid">
+        <button class="qa-btn" onclick="cpAction('Interview Prep')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Interview Prep
+        </button>
+        <button class="qa-btn" onclick="cpAction('Resume Match')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+          Resume Match
+        </button>
+        <button class="qa-btn" onclick="cpAction('Cover Letter Generator')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><polyline points="4 8 12 13 20 8"/></svg>
+          Cover Letter Generator
+        </button>
+        <button class="qa-btn" onclick="cpAction('Salary Script')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Salary Script
+        </button>
+        <button class="qa-btn" onclick="cpAction('Follow-up Email')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Follow-up Email
+        </button>
+      </div>
+    </div>
+
+    <div class="cp-input-row">
+      <input id="copilotInput" placeholder="Ask anything about your pipeline…" onkeydown="if(event.key==='Enter') sendCopilot()">
+      <button class="cp-send" onclick="sendCopilot()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      </button>
+    </div>
+  </aside>
+
+</div><!-- end app-body -->
+
+<!-- ══ ADD/EDIT JOB MODAL ═════════════════════════════════ -->
+<div class="overlay" id="jobModal" onclick="if(event.target===this)closeModal('jobModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Add New Job</div>
+      <button class="modal-close" onclick="closeModal('jobModal')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="form-row-2">
+      <div class="fg">
+        <label class="fl">Company <span class="req">*</span></label>
+        <input class="fi" id="f-company" placeholder="e.g. Stripe" oninput="clearErr('f-company')">
+        <div class="err-msg" id="e-company">Company is required</div>
+      </div>
+      <div class="fg">
+        <label class="fl">Role <span class="req">*</span></label>
+        <input class="fi" id="f-role" placeholder="e.g. Senior Engineer" oninput="clearErr('f-role')">
+        <div class="err-msg" id="e-role">Role is required</div>
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="fg">
+        <label class="fl">Department</label>
+        <input class="fi" id="f-dept" placeholder="e.g. Engineering">
+      </div>
+      <div class="fg">
+        <label class="fl">Status</label>
+        <select class="fs" id="f-status">
+          <option value="Wishlist">Wishlist</option>
+          <option value="Applied">Applied</option>
+          <option value="Interview">Interview</option>
+          <option value="Offer">Offer</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="fg">
+        <label class="fl">Salary</label>
+        <input class="fi" id="f-salary" placeholder="e.g. $140,000">
+      </div>
+      <div class="fg">
+        <label class="fl">AI Score (0–100)</label>
+        <input class="fi" id="f-score" type="number" min="0" max="100" placeholder="e.g. 82" oninput="clearErr('f-score')">
+        <div class="err-msg" id="e-score">Score must be 0–100</div>
+      </div>
+    </div>
+    <div class="form-row-2">
+      <div class="fg">
+        <label class="fl">Date Applied</label>
+        <input class="fi" id="f-date" type="date">
+      </div>
+      <div class="fg">
+        <label class="fl">Domain</label>
+        <input class="fi" id="f-domain" placeholder="e.g. stripe.com">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Notes</label>
+      <textarea class="fta" id="f-notes" placeholder="Any notes about this application…"></textarea>
+    </div>
+    <input type="hidden" id="f-edit-id">
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="closeModal('jobModal')">Cancel</button>
+      <button class="btn-prim" id="modalSaveBtn" onclick="saveJob()">Add Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DETAIL MODAL ══════════════════════════════════════ -->
+<div class="overlay" id="detailModal" onclick="if(event.target===this)closeModal('detailModal')">
+  <div class="modal detail-modal">
+    <div class="modal-head">
+      <div class="modal-title">Job Details</div>
+      <button class="modal-close" onclick="closeModal('detailModal')">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div id="detailContent"></div>
+    <div class="modal-foot">
+      <button class="btn-sec" onclick="closeModal('detailModal')">Close</button>
+      <button class="btn-prim" id="detailEditBtn" onclick="editFromDetail()">Edit</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS PANEL ════════════════════════════════════ -->
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-backdrop" onclick="closeSettings()"></div>
+  <div class="settings-drawer">
+    <div class="sd-head">
+      <div class="sd-title">Settings</div>
+      <button class="sd-close" onclick="closeSettings()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sd-section">
+      <div class="sd-section-title">Display</div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Dense table rows</div><div class="toggle-sub">Compact row height</div></div>
+        <label class="toggle"><input type="checkbox" id="tog-dense" onchange="toggleDenseRows(this.checked)"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Show domain in table</div><div class="toggle-sub">Display company domain</div></div>
+        <label class="toggle"><input type="checkbox" id="tog-domain" checked onchange="renderTable()"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Highlight urgent rows</div><div class="toggle-sub">Flag apps older than 7 days</div></div>
+        <label class="toggle"><input type="checkbox" id="tog-urgent" checked onchange="renderTable()"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="sd-section">
+      <div class="sd-section-title">Notifications</div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">Follow-up reminders</div><div class="toggle-sub">Alert after 5 days no response</div></div>
+        <label class="toggle"><input type="checkbox" checked id="tog-followup" onchange="toast(this.checked ? 'Follow-up reminders ON' : 'Follow-up reminders OFF')"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="toggle-row">
+        <div><div class="toggle-label">AI insight alerts</div><div class="toggle-sub">Copilot proactive tips</div></div>
+        <label class="toggle"><input type="checkbox" checked id="tog-ai-alerts" onchange="toast(this.checked ? 'AI insight alerts ON' : 'AI insight alerts OFF')"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="sd-section">
+      <div class="sd-section-title">Data</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="tool-btn" style="justify-content:flex-start" onclick="exportCSV();closeSettings()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export all jobs as CSV
+        </button>
+        <button class="tool-btn danger" style="justify-content:flex-start" onclick="if(confirm('Delete ALL jobs? This cannot be undone.')){jobs=[];applyFilters();updateAll();closeSettings();toast('All jobs deleted','error')}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          Clear all job data
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST CONTAINER ════════════════════════════════════ -->
+<div id="toasts"></div>
+
+<!-- ══════════════════════════════════════════════════════
+     JAVASCRIPT — Full logic, all features functional
+═══════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ─── DATA ──────────────────────────────────────────────── */
+const COLORS = {
+  OpenAI:'#10B981', Figma:'#F24E1E', Stripe:'#6772E5',
+  Vercel:'#000000', Linear:'#5E6AD2', Notion:'#191919',
+  Google:'#4285F4', Apple:'#555', Meta:'#0866FF',
+  Amazon:'#FF9900', Microsoft:'#00A4EF'
+};
+function coColor(name){ return COLORS[name] || '#1B5FE8'; }
+
+let jobs = [
+  {id:1, company:'OpenAI',  domain:'openai.com',  role:'Research Engineer',   dept:'AI Research', status:'Wishlist',  salary:'Undisclosed', date:'2026-03-17', score:null, notes:'Referral from Jake. Strong team alignment.'},
+  {id:2, company:'Figma',   domain:'figma.com',   role:'Frontend Engineer',   dept:'Design Tools', status:'Offer',   salary:'$145,000',    date:'2026-02-28', score:91,   notes:'Offer expires March 30. Need to decide soon.'},
+  {id:3, company:'Stripe',  domain:'stripe.com',  role:'Software Engineer II',dept:'Payments',    status:'Interview',salary:'$160,000',    date:'2026-03-05', score:84,   notes:'Final round next week. System design + culture fit.'},
+  {id:4, company:'Vercel',  domain:'vercel.com',  role:'Developer Advocate',  dept:'DevRel',      status:'Applied',  salary:'$120,000',    date:'2026-03-13', score:72,   notes:'No response yet. Consider follow-up.'},
+  {id:5, company:'Linear',  domain:'linear.app',  role:'Product Engineer',    dept:'Product',     status:'Wishlist', salary:'Undisclosed', date:'2026-03-18', score:null, notes:'Dream company. Will apply next week.'},
+];
+
+let filtered   = [...jobs];
+let sortState  = { col: null, dir: 'asc' };
+let activeCoFilter = null;
+let selectedIds = new Set();
+let currentDetailId = null;
+let notifications = [
+  {id:1, icon:'🔔', text:'Figma offer expires in 9 days — review details', time:'2h ago', unread:true},
+  {id:2, icon:'⚡', text:'Vercel application is 8 days old — follow up now', time:'1d ago', unread:true},
+  {id:3, icon:'🤖', text:'AI Copilot has new insights for your pipeline', time:'2d ago', unread:true},
+  {id:4, icon:'✅', text:'Stripe moved to Interview stage', time:'3d ago', unread:false},
+];
+
+/* ─── TOAST ─────────────────────────────────────────────── */
+function toast(msg, type='info'){
+  const c = document.getElementById('toasts');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type !== 'info' ? ' '+type : '');
+  const icons = {success:'✓', error:'✕', warning:'⚠', info:'ℹ'};
+  t.textContent = (icons[type]||'ℹ') + '  ' + msg;
+  c.appendChild(t);
+  setTimeout(()=>{ t.style.animation='toastOut 0.3s ease forwards'; setTimeout(()=>t.remove(),300); }, 3000);
+}
+
+/* ─── MODAL ──────────────────────────────────────────────── */
+function openModal(mode, id){
+  const el = document.getElementById('jobModal');
+  const isEdit = mode === 'edit';
+  document.getElementById('modalTitle').textContent   = isEdit ? 'Edit Job' : 'Add New Job';
+  document.getElementById('modalSaveBtn').textContent = isEdit ? 'Save Changes' : 'Add Job';
+  document.getElementById('f-edit-id').value = id || '';
+  ['company','role','dept','salary','score','date','domain','notes','status'].forEach(k=>{
+    const el = document.getElementById('f-'+k);
+    if(isEdit && id){
+      const j = jobs.find(x=>x.id===id);
+      if(j) el.value = j[k] ?? '';
+    } else {
+      if(k==='date') el.value = new Date().toISOString().split('T')[0];
+      else if(k==='status') el.value = 'Wishlist';
+      else el.value = '';
+    }
+  });
+  ['company','role','score'].forEach(k=>{ clearErr('f-'+k); });
+  el.classList.add('open');
+}
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function clearErr(id){
+  document.getElementById(id).classList.remove('error');
+  const eId = id.replace('f-','e-');
+  const em = document.getElementById(eId);
+  if(em) em.classList.remove('show');
+}
+function showErr(id, msg){
+  const el = document.getElementById('f-'+id);
+  el.classList.add('error');
+  const em = document.getElementById('e-'+id);
+  if(em){ em.textContent = msg; em.classList.add('show'); }
+  return false;
+}
+
+function saveJob(){
+  const company = document.getElementById('f-company').value.trim();
+  const role    = document.getElementById('f-role').value.trim();
+  const scoreRaw= document.getElementById('f-score').value.trim();
+  let valid = true;
+  if(!company) valid = showErr('company','Company is required');
+  if(!role)    valid = showErr('role','Role is required');
+  if(scoreRaw !== '' && (isNaN(Number(scoreRaw)) || Number(scoreRaw)<0 || Number(scoreRaw)>100)){
+    valid = showErr('score','Score must be between 0 and 100');
+  }
+  if(!valid) return;
+
+  const score = scoreRaw === '' ? null : Math.round(Number(scoreRaw));
+  const editId = Number(document.getElementById('f-edit-id').value);
+
+  const data = {
+    company, role,
+    dept:   document.getElementById('f-dept').value.trim()   || 'Engineering',
+    status: document.getElementById('f-status').value,
+    salary: document.getElementById('f-salary').value.trim() || 'Undisclosed',
+    date:   document.getElementById('f-date').value          || new Date().toISOString().split('T')[0],
+    domain: document.getElementById('f-domain').value.trim() || company.toLowerCase().replace(/\s+/g,'')+'.com',
+    notes:  document.getElementById('f-notes').value.trim(),
+    score,
+  };
+
+  if(editId){
+    const idx = jobs.findIndex(j=>j.id===editId);
+    if(idx !== -1){ jobs[idx] = {...jobs[idx], ...data}; }
+    toast(`Updated: ${company} — ${role}`, 'success');
+  } else {
+    jobs.unshift({id: Date.now(), ...data});
+    toast(`Added: ${company} — ${role}`, 'success');
+  }
+  closeModal('jobModal');
+  applyFilters();
+  updateAll();
+}
+
+/* ─── DETAIL MODAL ───────────────────────────────────────── */
+function openDetail(id){
+  const j = jobs.find(x=>x.id===id);
+  if(!j) return;
+  currentDetailId = id;
+  const scoreHtml = j.score !== null
+    ? `<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="height:100%;width:${j.score}%;background:${j.score>=80?'var(--green-dot)':j.score>=60?'var(--orange-dot)':'var(--red-dot)'};border-radius:3px"></div></div><span style="font-family:var(--mono);font-size:13px;font-weight:500">${j.score}/100</span></div>`
+    : `<span style="color:var(--text-muted)">Not scored</span>`;
+  document.getElementById('detailContent').innerHTML = `
+    <div class="dm-header">
+      <div class="dm-avatar" style="background:${coColor(j.company)}">${j.company[0]}</div>
+      <div><div class="dm-co">${j.company}</div><div class="dm-role">${j.role} · ${j.dept}</div></div>
+      <div style="margin-left:auto">${badgeHtml(j.status)}</div>
+    </div>
+    <div class="dm-grid">
+      <div class="dm-field"><div class="dm-field-label">Salary</div><div class="dm-field-value">${j.salary}</div></div>
+      <div class="dm-field"><div class="dm-field-label">Applied</div><div class="dm-field-value">${fmtDate(j.date)}</div></div>
+      <div class="dm-field"><div class="dm-field-label">Domain</div><div class="dm-field-value"><a href="https://${j.domain}" target="_blank" style="color:var(--accent)">${j.domain}</a></div></div>
+      <div class="dm-field"><div class="dm-field-label">AI Score</div><div class="dm-field-value">${scoreHtml}</div></div>
+    </div>
+    ${j.notes ? `<div class="dm-notes"><div class="dm-notes-label">Notes</div><div class="dm-notes-text">${j.notes}</div></div>` : ''}
+  `;
+  document.getElementById('detailModal').classList.add('open');
+}
+function editFromDetail(){
+  closeModal('detailModal');
+  setTimeout(()=>openModal('edit', currentDetailId), 50);
+}
+
+/* ─── RENDERING ──────────────────────────────────────────── */
+const STATUS_MAP = {
+  Wishlist: 'wishlist', Applied: 'applied',
+  Interview:'interview', Offer:'offer', Rejected:'rejected'
+};
+function badgeHtml(status){
+  const cls = STATUS_MAP[status]||'wishlist';
+  return `<span class="badge b-${cls}"><span class="badge-dot"></span>${status}</span>`;
+}
+function scoreHtml(score){
+  if(score === null) return `<span class="sal-na">—</span>`;
+  const c = score>=80?'var(--green-dot)':score>=60?'var(--orange-dot)':'var(--red-dot)';
+  return `<div class="score-wrap"><div class="score-track"><div class="score-fill" style="width:${score}%;background:${c}"></div></div><span class="score-num">${score}</span></div>`;
+}
+function fmtDate(d){
+  const dt = new Date(d+'T00:00:00');
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+function daysAgo(d){
+  const diff = Math.floor((Date.now() - new Date(d+'T00:00:00'))/(1000*60*60*24));
+  if(diff===0) return 'Today';
+  if(diff===1) return '1 day ago';
+  return `${diff}d ago`;
+}
+
+function renderTable(){
+  const tbody   = document.getElementById('tbody');
+  const showDomain = document.getElementById('tog-domain')?.checked ?? true;
+  const showUrgent = document.getElementById('tog-urgent')?.checked ?? true;
+  const dense      = document.getElementById('tog-dense')?.checked  ?? false;
+
+  if(filtered.length === 0){
+    tbody.innerHTML = `
+      <tr><td colspan="8">
+        <div class="empty-state">
+          <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></div>
+          <div class="empty-title">No jobs found</div>
+          <div class="empty-sub">Try adjusting your search or filters</div>
+          <div class="empty-cta" onclick="clearAllFilters()">Clear all filters</div>
+        </div>
+      </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(j=>{
+    const isUrgent = showUrgent && j.status === 'Applied' && (Date.now()-new Date(j.date+'T00:00:00'))>7*86400000;
+    const tdStyle  = dense ? 'padding:7px 16px' : '';
+    const sel      = selectedIds.has(j.id);
+    return `
+      <tr class="${sel?'selected':''}" onclick="openDetail(${j.id})" data-id="${j.id}">
+        <td style="${tdStyle}" onclick="event.stopPropagation()">
+          <input type="checkbox" class="cb" ${sel?'checked':''} onchange="toggleRow(${j.id},this.checked)" title="Select row">
+        </td>
+        <td style="${tdStyle}">
+          <div class="company-cell">
+            <div class="avatar" style="background:${coColor(j.company)}">${j.company[0]}</div>
+            <div>
+              <div class="co-name">${j.company}</div>
+              ${showDomain?`<div class="co-domain">${j.domain}</div>`:''}
+            </div>
+          </div>
+        </td>
+        <td style="${tdStyle}"><div class="role-name">${j.role}</div><div class="role-dept">${j.dept}</div></td>
+        <td style="${tdStyle}">${badgeHtml(j.status)}</td>
+        <td style="${tdStyle}">${j.salary==='Undisclosed'?`<span class="sal-na">Undisclosed</span>`:`<span class="sal-val">${j.salary}</span>`}</td>
+        <td style="${tdStyle}">
+          <div class="date-val">${fmtDate(j.date)}</div>
+          <div class="date-ago ${isUrgent?'date-urgent':''}">${daysAgo(j.date)}${isUrgent?' ⚠':''}</div>
+        </td>
+        <td style="${tdStyle}">${scoreHtml(j.score)}</td>
+        <td style="${tdStyle}" onclick="event.stopPropagation()">
+          <div class="row-actions">
+            <button class="row-btn" onclick="openModal('edit',${j.id})" title="Edit">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="row-btn del" onclick="deleteJob(${j.id})" title="Delete">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            </button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+  document.getElementById('rowCount').textContent = `${filtered.length} job${filtered.length!==1?'s':''}`;
+}
+
+function renderKanban(){
+  const statuses = ['Wishlist','Applied','Interview','Offer','Rejected'];
+  const colColors = {Wishlist:'var(--blue)',Applied:'var(--green)',Interview:'var(--orange)',Offer:'var(--purple)',Rejected:'var(--red)'};
+  const board = document.getElementById('kanbanBoard');
+  board.innerHTML = statuses.map(st=>{
+    const cols = jobs.filter(j=>j.status===st);
+    return `
+      <div class="kanban-col">
+        <div class="kanban-col-head">
+          <span class="kanban-col-title" style="color:${colColors[st]}">${st}</span>
+          <span class="kanban-col-count">${cols.length}</span>
+        </div>
+        <div class="kanban-cards">
+          ${cols.length===0?'<div style="font-size:12px;color:var(--text-muted);text-align:center;padding:12px 0">No jobs</div>':
+          cols.map(j=>`
+            <div class="kanban-card" onclick="openDetail(${j.id})">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+                <div class="avatar" style="background:${coColor(j.company)};width:24px;height:24px;font-size:10px;border-radius:5px">${j.company[0]}</div>
+                <div class="kc-co">${j.company}</div>
+              </div>
+              <div class="kc-role">${j.role}</div>
+              <div class="kc-foot">
+                <span class="kc-date">${fmtDate(j.date)}</span>
+                ${j.score!==null?`<span style="font-family:var(--mono);font-size:11px;background:var(--bg-base);padding:1px 7px;border-radius:20px;color:var(--text-secondary)">${j.score}</span>`:''}
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderTimeline(){
+  const sorted = [...jobs].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const icons = {Wishlist:'⭐',Applied:'📤',Interview:'🗓',Offer:'🎉',Rejected:'❌'};
+  const bgColors = {Wishlist:COLORS.OpenAI,Applied:'var(--green)',Interview:'var(--orange)',Offer:'var(--purple)',Rejected:'var(--red)'};
+  document.getElementById('timelineBody').innerHTML = sorted.map(j=>`
+    <div class="tl-item">
+      <div class="tl-line"></div>
+      <div class="tl-dot" style="background:${bgColors[j.status]||'var(--accent)'}">
+        <span style="font-size:12px">${icons[j.status]||'📌'}</span>
+      </div>
+      <div class="tl-content">
+        <div class="tl-title">${j.company} — ${j.role}</div>
+        <div class="tl-meta">${j.dept} · ${j.salary} · ${badgeHtml(j.status)}</div>
+        <div class="tl-date">${fmtDate(j.date)} (${daysAgo(j.date)})</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ─── KPI / STATS ────────────────────────────────────────── */
+function updateAll(){
+  // kpi
+  document.getElementById('kpi-total').textContent      = jobs.length;
+  document.getElementById('kpi-interviews').textContent = jobs.filter(j=>j.status==='Interview').length;
+  document.getElementById('kpi-offers').textContent     = jobs.filter(j=>j.status==='Offer').length;
+  const scored = jobs.filter(j=>j.score!==null);
+  document.getElementById('kpi-score').textContent = scored.length
+    ? Math.round(scored.reduce((s,j)=>s+j.score,0)/scored.length) : '—';
+
+  // sidebar stats
+  document.getElementById('sp-applied').textContent    = jobs.filter(j=>j.status==='Applied').length;
+  document.getElementById('sp-interviews').textContent = jobs.filter(j=>j.status==='Interview').length;
+  document.getElementById('sp-offers').textContent     = jobs.filter(j=>j.status==='Offer').length;
+  document.getElementById('sp-rejected').textContent   = jobs.filter(j=>j.status==='Rejected').length;
+
+  // nav badges
+  document.getElementById('nb-applications').textContent = jobs.filter(j=>j.status!=='Wishlist').length;
+  document.getElementById('nb-interviews').textContent   = jobs.filter(j=>j.status==='Interview').length;
+
+  // copilot counts
+  document.getElementById('cp-active-count').textContent = jobs.length;
+  document.getElementById('cp-co-count').textContent     = new Set(jobs.map(j=>j.company)).size;
+
+  // company chips
+  renderCompanyChips();
+
+  // re-render active view
+  const view = document.querySelector('.vtab.active')?.id?.replace('tab-','') || 'table';
+  if(view==='table')    renderTable();
+  if(view==='kanban')   renderKanban();
+  if(view==='timeline') renderTimeline();
+}
+
+function renderCompanyChips(){
+  const cos = [...new Set(jobs.map(j=>j.company))];
+  document.getElementById('companyChips').innerHTML = cos.map(c=>
+    `<span class="chip ${activeCoFilter===c?'active':''}" onclick="toggleCoFilter('${c}')">${c}</span>`
+  ).join('');
+}
+
+/* ─── FILTERING / SORTING ────────────────────────────────── */
+function applyFilters(){
+  const q       = document.getElementById('globalSearch').value.toLowerCase();
+  const status  = document.getElementById('statusFilter').value;
+  filtered = jobs.filter(j=>{
+    const matchQ  = !q || j.company.toLowerCase().includes(q)||j.role.toLowerCase().includes(q)||j.status.toLowerCase().includes(q)||j.dept.toLowerCase().includes(q);
+    const matchSt = !status || j.status===status;
+    const matchCo = !activeCoFilter || j.company===activeCoFilter;
+    return matchQ && matchSt && matchCo;
+  });
+  applySort();
+}
+
+function applySort(){
+  const s = document.getElementById('sortSelect').value;
+  if(s==='company')    filtered.sort((a,b)=>a.company.localeCompare(b.company));
+  else if(s==='date_desc') filtered.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  else if(s==='date_asc')  filtered.sort((a,b)=>new Date(a.date)-new Date(b.date));
+  else if(s==='score_desc') filtered.sort((a,b)=>(b.score??-1)-(a.score??-1));
+  else if(s==='score_asc')  filtered.sort((a,b)=>(a.score??999)-(b.score??999));
+  else if(s==='salary'){
+    filtered.sort((a,b)=>{
+      const pa = parseInt(a.salary.replace(/[^0-9]/g,''))||0;
+      const pb = parseInt(b.salary.replace(/[^0-9]/g,''))||0;
+      return pb-pa;
+    });
+  }
+  renderTable();
+  renderKanban();
+  renderTimeline();
+}
+
+// click-on-header column sort
+let colSortDir = {};
+function sortCol(col){
+  colSortDir[col] = colSortDir[col]==='asc' ? 'desc' : 'asc';
+  const dir = colSortDir[col];
+  filtered.sort((a,b)=>{
+    let va=a[col], vb=b[col];
+    if(col==='score'){va=va??-1;vb=vb??-1;}
+    if(col==='date'){va=new Date(va);vb=new Date(vb);}
+    if(col==='salary'){va=parseInt(va.replace(/[^0-9]/g,''))||0;vb=parseInt(vb.replace(/[^0-9]/g,''))||0;}
+    if(typeof va==='string') va=va.toLowerCase();
+    if(typeof vb==='string') vb=vb.toLowerCase();
+    if(va<vb) return dir==='asc'?-1:1;
+    if(va>vb) return dir==='asc'?1:-1;
+    return 0;
+  });
+  // update header styles
+  document.querySelectorAll('thead th').forEach(th=>th.classList.remove('sort-asc','sort-desc'));
+  const cols=['company','role','status','salary','date','score'];
+  const idx = cols.indexOf(col);
+  if(idx>=0) document.querySelectorAll('thead th')[idx+1]?.classList.add('sort-'+dir);
+  renderTable();
+}
+
+function onSearch(val){
+  document.getElementById('searchClear').classList.toggle('visible', val.length>0);
+  applyFilters();
+}
+function clearSearch(){
+  document.getElementById('globalSearch').value='';
+  document.getElementById('searchClear').classList.remove('visible');
+  applyFilters();
+}
+function toggleCoFilter(co){
+  activeCoFilter = activeCoFilter===co ? null : co;
+  renderCompanyChips();
+  applyFilters();
+}
+function filterByStatus(st){
+  document.getElementById('statusFilter').value=st;
+  applyFilters();
+}
+function clearAllFilters(){
+  document.getElementById('globalSearch').value='';
+  document.getElementById('statusFilter').value='';
+  document.getElementById('sortSelect').value='';
+  document.getElementById('searchClear').classList.remove('visible');
+  activeCoFilter=null;
+  filtered=[...jobs];
+  renderCompanyChips();
+  renderTable();
+  toast('Filters cleared');
+}
+
+/* ─── DELETE ─────────────────────────────────────────────── */
+function deleteJob(id){
+  const j = jobs.find(x=>x.id===id);
+  if(!confirm(`Remove "${j?.company} — ${j?.role}"?`)) return;
+  jobs = jobs.filter(x=>x.id!==id);
+  selectedIds.delete(id);
+  applyFilters();
+  updateAll();
+  toast(`Removed: ${j?.company}`, 'warning');
+}
+
+/* ─── BULK SELECT ────────────────────────────────────────── */
+function toggleRow(id, checked){
+  checked ? selectedIds.add(id) : selectedIds.delete(id);
+  updateBulkUI();
+  renderTable();
+}
+function toggleSelectAll(checked){
+  filtered.forEach(j=>checked?selectedIds.add(j.id):selectedIds.delete(j.id));
+  updateBulkUI();
+  renderTable();
+}
+function updateBulkUI(){
+  const n = selectedIds.size;
+  const btn = document.getElementById('bulkDeleteBtn');
+  btn.style.display = n>0 ? 'flex' : 'none';
+  document.getElementById('selectedCount').textContent = n;
+  const all = filtered.every(j=>selectedIds.has(j.id)) && filtered.length>0;
+  document.getElementById('selectAll').checked = all;
+  document.getElementById('selectAll').indeterminate = !all && n>0;
+}
+function bulkDelete(){
+  if(!confirm(`Delete ${selectedIds.size} selected job(s)?`)) return;
+  const n = selectedIds.size;
+  jobs = jobs.filter(j=>!selectedIds.has(j.id));
+  selectedIds.clear();
+  applyFilters();
+  updateAll();
+  updateBulkUI();
+  toast(`Deleted ${n} job${n>1?'s':''}`, 'error');
+}
+
+/* ─── EXPORT CSV ─────────────────────────────────────────── */
+function exportCSV(){
+  const header = ['Company','Domain','Role','Department','Status','Salary','Date Applied','AI Score','Notes'];
+  const rows = jobs.map(j=>[j.company,j.domain,j.role,j.dept,j.status,j.salary,j.date,j.score??'',j.notes??'']);
+  const csv = [header,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = `JobTracker_Export_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  toast('CSV exported!', 'success');
+}
+
+/* ─── VIEW SWITCH ────────────────────────────────────────── */
+function switchView(v){
+  ['table','kanban','timeline'].forEach(id=>{
+    const el = document.getElementById(id+'-view');
+    el.classList.toggle('active', id===v);
+    if(id===v) el.style.display='';
+    else el.style.display='none';
+    document.getElementById('tab-'+id).classList.toggle('active', id===v);
+  });
+  if(v==='table')    renderTable();
+  if(v==='kanban')   renderKanban();
+  if(v==='timeline') renderTimeline();
+}
+
+/* ─── COLUMN MENU (toggle salary col visibility demo) ─────── */
+function toggleColMenu(){
+  toast('Column visibility coming in v2 — toggle "Show domain" in Settings now');
+}
+
+/* ─── SIDEBAR ────────────────────────────────────────────── */
+function toggleSidebar(){
+  const sb = document.getElementById('sidebar');
+  const collapsed = sb.classList.toggle('collapsed');
+  const icon = document.getElementById('collapseIcon');
+  icon.innerHTML = collapsed
+    ? `<polyline points="9 18 15 12 9 6"/>`
+    : `<polyline points="15 18 9 12 15 6"/>`;
+  toast(collapsed?'Sidebar collapsed':'Sidebar expanded');
+}
+
+/* ─── NAV ────────────────────────────────────────────────── */
+function navTo(page){
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
+  document.getElementById('nav-'+page)?.classList.add('active');
+  const titles = {dashboard:'Dashboard',applications:'Applications',interviews:'Interviews',documents:'Documents'};
+  const subs   = {dashboard:'Your job search pipeline',applications:'All your applications',interviews:'Upcoming interviews',documents:'Resumes & cover letters'};
+  document.getElementById('pageTitle').textContent = titles[page]||page;
+  document.getElementById('pageSub').textContent   = subs[page]||'';
+  if(page!=='dashboard') toast(`${titles[page]} — full view coming in v2`);
+}
+
+/* ─── NOTIFICATIONS ──────────────────────────────────────── */
+function renderNotifs(){
+  const list = document.getElementById('notifList');
+  list.innerHTML = notifications.map(n=>`
+    <div class="notif-item ${n.unread?'unread':''}" onclick="markNotifRead(${n.id})">
+      <div class="ni-icon" style="background:${n.unread?'var(--accent-light)':'var(--bg-base)'}">${n.icon}</div>
+      <div class="ni-body">
+        <div class="ni-text">${n.text}</div>
+        <div class="ni-time">${n.time}</div>
+      </div>
+    </div>`).join('');
+  const count = notifications.filter(n=>n.unread).length;
+  const el = document.getElementById('notifCount');
+  el.textContent = count;
+  el.style.display = count>0?'flex':'none';
+}
+function markNotifRead(id){
+  const n = notifications.find(x=>x.id===id);
+  if(n){ n.unread=false; renderNotifs(); }
+}
+function clearNotifs(){
+  notifications.forEach(n=>n.unread=false);
+  renderNotifs();
+  toast('All notifications marked as read');
+}
+function toggleNotifPanel(){
+  const p = document.getElementById('notifPanel');
+  p.classList.toggle('open');
+  if(p.classList.contains('open')) renderNotifs();
+}
+// close notif panel on outside click
+document.addEventListener('click', e=>{
+  const panel = document.getElementById('notifPanel');
+  const btn   = document.getElementById('notifBtn');
+  if(panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)){
+    panel.classList.remove('open');
+  }
+});
+
+/* ─── AI COPILOT ─────────────────────────────────────────── */
+function toggleCopilot(){
+  const p  = document.getElementById('copilotPanel');
+  const btn= document.getElementById('copilotToggle');
+  const hidden = p.classList.toggle('hidden');
+  btn.classList.toggle('panel-open', !hidden);
+}
+
+const cpResponses = {
+  'interview prep': "Here are 5 common questions for Software Engineer roles:\n1. Design a URL shortener\n2. Explain your largest technical project\n3. Tradeoffs: SQL vs NoSQL\n4. Behavioral: conflict resolution\n5. Reverse a linked list in O(n)",
+  'follow': "Draft follow-up:\n\nSubject: Following up — [Role] at [Company]\n\nHi [Name],\n\nI wanted to follow up on my application from [Date]. I remain very excited about this opportunity and would love to discuss further.\n\nBest, [Your Name]",
+  'score': "Your average AI match score is based on skills overlap, company culture fit, and role requirements. Scores above 80 indicate strong alignment.",
+  'offer': "For the Figma offer: Consider negotiating equity vesting, remote work policy, and signing bonus. Typical response window is 1–2 weeks.",
+  'salary': "Based on your pipeline: Stripe offers $160K (highest), Figma $145K, Vercel $120K. Market rate for Senior Frontend in 2026 is $140–175K.",
+};
+function sendCopilot(){
+  const inp = document.getElementById('copilotInput');
+  const txt = inp.value.trim();
+  if(!txt) return;
+  inp.value='';
+  const msgs = document.getElementById('cpMsgs');
+
+  // user bubble
+  const ub = document.createElement('div');
+  ub.className='cp-user-bubble';
+  ub.textContent=txt;
+  msgs.appendChild(ub);
+
+  // typing
+  const tb = document.createElement('div');
+  tb.className='cp-ai-bubble cp-typing';
+  tb.innerHTML='<span></span><span></span><span></span>';
+  msgs.appendChild(tb);
+  msgs.scrollTop=msgs.scrollHeight;
+
+  setTimeout(()=>{
+    tb.remove();
+    const key = Object.keys(cpResponses).find(k=>txt.toLowerCase().includes(k));
+    const reply = key ? cpResponses[key] : `Analyzing your pipeline… You have ${jobs.length} jobs tracked. ${jobs.filter(j=>j.status==='Interview').length} interview(s) active. Try asking about "salary", "follow-up", "score", or "offer".`;
+    const ab = document.createElement('div');
+    ab.className='cp-ai-bubble';
+    ab.style.whiteSpace='pre-wrap';
+    ab.style.fontSize='12.5px';
+    ab.style.color='var(--text-secondary)';
+    ab.textContent=reply;
+    msgs.appendChild(ab);
+    msgs.scrollTop=msgs.scrollHeight;
+  }, 900);
+}
+function cpAction(label){
+  document.getElementById('copilotInput').value=label;
+  sendCopilot();
+}
+
+/* ─── SETTINGS ───────────────────────────────────────────── */
+function openSettings(){  document.getElementById('settingsPanel').classList.add('open');  }
+function closeSettings(){ document.getElementById('settingsPanel').classList.remove('open'); }
+function toggleDenseRows(v){ renderTable(); toast(v?'Dense rows on':'Dense rows off'); }
+
+/* ─── KEYBOARD SHORTCUTS ─────────────────────────────────── */
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.overlay.open').forEach(el=>el.classList.remove('open'));
+    document.getElementById('notifPanel').classList.remove('open');
+    document.getElementById('settingsPanel').classList.remove('open');
+  }
+  if((e.ctrlKey||e.metaKey) && e.key==='k'){
+    e.preventDefault();
+    document.getElementById('globalSearch').focus();
+  }
+  if((e.ctrlKey||e.metaKey) && e.key==='n' && !document.querySelector('.overlay.open')){
+    e.preventDefault();
+    openModal('add');
+  }
+});
+
+/* ─── INIT ───────────────────────────────────────────────── */
+(function init(){
+  // set table as active view
+  document.getElementById('kanban-view').style.display='none';
+  document.getElementById('timeline-view').style.display='none';
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  applyFilters();
+  updateAll();
+  renderNotifs();
+  // keyboard hint toast after brief delay
+  setTimeout(()=>toast('Tip: Ctrl+N = New Job · Ctrl+K = Search · Esc = Close', 'info'), 1500);
+})();
+</script>
+</body>
+</html>

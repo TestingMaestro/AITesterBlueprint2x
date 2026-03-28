@@ -1,0 +1,71 @@
+// Mock data for demo mode (when Supabase keys are not configured)
+import type { Job } from '@/types'
+
+export const MOCK_JOBS: Job[] = [
+  {
+    id: 'j1', user_id: 'demo', company: 'Stripe', role: 'Senior Frontend Engineer',
+    location: 'Remote', url: 'https://stripe.com/jobs',
+    salary_min: 180000, salary_max: 230000,
+    status: 'interview', priority: 'high',
+    notes: 'Great culture, strong eng team. Met PM at conference.',
+    ai_score: 87, created_at: new Date(Date.now() - 12 * 86400000).toISOString(),
+    applied_at: new Date(Date.now() - 10 * 86400000).toISOString(),
+  },
+  {
+    id: 'j2', user_id: 'demo', company: 'Vercel', role: 'Staff Engineer, DX',
+    location: 'San Francisco, CA',
+    salary_min: 200000, salary_max: 260000,
+    status: 'applied', priority: 'high',
+    notes: 'Dream job. Worked with Next.js extensively.',
+    ai_score: 92, created_at: new Date(Date.now() - 5 * 86400000).toISOString(),
+    applied_at: new Date(Date.now() - 4 * 86400000).toISOString(),
+  },
+  {
+    id: 'j3', user_id: 'demo', company: 'Linear', role: 'Product Engineer',
+    location: 'Remote', salary_min: 160000, salary_max: 200000,
+    status: 'screening', priority: 'medium',
+    notes: 'Small team. Love the product.',
+    ai_score: 78, created_at: new Date(Date.now() - 8 * 86400000).toISOString(),
+    applied_at: new Date(Date.now() - 7 * 86400000).toISOString(),
+  },
+  {
+    id: 'j4', user_id: 'demo', company: 'Anthropic', role: 'AI Product Engineer',
+    location: 'San Francisco, CA',
+    salary_min: 220000, salary_max: 300000,
+    status: 'wishlist', priority: 'high',
+    notes: 'Need to tailor resume more for AI-specific roles.',
+    created_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+  {
+    id: 'j5', user_id: 'demo', company: 'Figma', role: 'Engineering Manager, Web',
+    location: 'New York, NY', salary_min: 210000, salary_max: 270000,
+    status: 'offer', priority: 'high',
+    notes: 'Verbal offer received! Negotiating details.',
+    ai_score: 81, created_at: new Date(Date.now() - 20 * 86400000).toISOString(),
+    applied_at: new Date(Date.now() - 18 * 86400000).toISOString(),
+  },
+  {
+    id: 'j6', user_id: 'demo', company: 'Notion', role: 'Senior Full Stack Engineer',
+    location: 'Remote', salary_min: 170000, salary_max: 210000,
+    status: 'rejected', priority: 'medium',
+    notes: 'Good feedback on system design. Weak on Python round.',
+    ai_score: 65, created_at: new Date(Date.now() - 30 * 86400000).toISOString(),
+    applied_at: new Date(Date.now() - 28 * 86400000).toISOString(),
+  },
+  {
+    id: 'j7', user_id: 'demo', company: 'GitHub', role: 'Senior Software Engineer, Copilot',
+    location: 'Remote', salary_min: 190000, salary_max: 240000,
+    status: 'ghosted', priority: 'low',
+    notes: 'Applied 3 weeks ago, no response. May follow up.',
+    ai_score: 72, created_at: new Date(Date.now() - 25 * 86400000).toISOString(),
+    applied_at: new Date(Date.now() - 24 * 86400000).toISOString(),
+  },
+  {
+    id: 'j8', user_id: 'demo', company: 'Loom', role: 'Frontend Engineer, Growth',
+    location: 'Remote', salary_min: 150000, salary_max: 185000,
+    status: 'applied', priority: 'medium',
+    notes: 'Interesting intersection of growth & engineering.',
+    created_at: new Date(Date.now() - 3 * 86400000).toISOString(),
+    applied_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+  },
+]
