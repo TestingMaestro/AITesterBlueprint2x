@@ -1,0 +1,1002 @@
+[
+  {
+    "id": "TC_001",
+    "module": "Authentication",
+    "title": "Valid Login with correct credentials",
+    "preconditions": "User has a registered VWO account",
+    "steps": "1. Navigate to app.vwo.com\n2. Enter valid email\n3. Enter valid password\n4. Click Login",
+    "expectedResult": "User is redirected to VWO Dashboard successfully",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_002",
+    "module": "Authentication",
+    "title": "Login with invalid password",
+    "preconditions": "User has a registered VWO account",
+    "steps": "1. Navigate to app.vwo.com\n2. Enter valid email\n3. Enter incorrect password\n4. Click Login",
+    "expectedResult": "Error message displayed: Invalid credentials",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_003",
+    "module": "Authentication",
+    "title": "Login with unregistered email",
+    "preconditions": "No account exists for the email",
+    "steps": "1. Navigate to app.vwo.com\n2. Enter unregistered email\n3. Enter any password\n4. Click Login",
+    "expectedResult": "Error message displayed: Account not found",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_004",
+    "module": "Authentication",
+    "title": "Login with empty email field",
+    "preconditions": "User is on login page",
+    "steps": "1. Navigate to app.vwo.com\n2. Leave email field empty\n3. Enter password\n4. Click Login",
+    "expectedResult": "Validation error: Email is required",
+    "priority": "Medium",
+    "type": "UI"
+  },
+  {
+    "id": "TC_005",
+    "module": "Authentication",
+    "title": "Login with empty password field",
+    "preconditions": "User is on login page",
+    "steps": "1. Navigate to app.vwo.com\n2. Enter valid email\n3. Leave password empty\n4. Click Login",
+    "expectedResult": "Validation error: Password is required",
+    "priority": "Medium",
+    "type": "UI"
+  },
+  {
+    "id": "TC_006",
+    "module": "Authentication",
+    "title": "Forgot Password flow",
+    "preconditions": "User has a registered account",
+    "steps": "1. Click Forgot Password link\n2. Enter registered email\n3. Click Submit\n4. Check email for reset link",
+    "expectedResult": "Password reset email is sent with a secure token link",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_007",
+    "module": "Authentication",
+    "title": "Password reset with invalid email",
+    "preconditions": "User is on forgot password page",
+    "steps": "1. Click Forgot Password\n2. Enter unregistered email\n3. Click Submit",
+    "expectedResult": "Error message: No account found with this email",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_008",
+    "module": "Authentication",
+    "title": "Remember Me checkbox functionality",
+    "preconditions": "User has valid credentials",
+    "steps": "1. Navigate to app.vwo.com\n2. Enter valid credentials\n3. Check Remember Me\n4. Login\n5. Close browser\n6. Reopen app.vwo.com",
+    "expectedResult": "User session is preserved; user remains logged in",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_009",
+    "module": "Authentication",
+    "title": "Logout from VWO",
+    "preconditions": "User is logged into VWO",
+    "steps": "1. Click user profile/avatar\n2. Click Logout",
+    "expectedResult": "User is logged out and redirected to login page; session is invalidated",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_010",
+    "module": "Authentication",
+    "title": "SSO Login integration",
+    "preconditions": "Enterprise SSO is configured for user organization",
+    "steps": "1. Navigate to app.vwo.com\n2. Click SSO Login option\n3. Enter SSO credentials\n4. Authenticate via identity provider",
+    "expectedResult": "User is authenticated via SSO and redirected to VWO Dashboard",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_011",
+    "module": "Authentication",
+    "title": "Multi-Factor Authentication setup",
+    "preconditions": "User has MFA enabled in settings",
+    "steps": "1. Login with valid credentials\n2. System prompts for 2FA code\n3. Enter valid 2FA code",
+    "expectedResult": "User is authenticated and redirected to dashboard",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_012",
+    "module": "Authentication",
+    "title": "Login with invalid 2FA code",
+    "preconditions": "User has MFA enabled",
+    "steps": "1. Login with valid credentials\n2. Enter invalid 2FA code",
+    "expectedResult": "Error: Invalid authentication code; access denied",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_013",
+    "module": "Authentication",
+    "title": "Email format validation on login",
+    "preconditions": "User is on login page",
+    "steps": "1. Enter invalid email format (e.g., user@)\n2. Tab out of email field",
+    "expectedResult": "Real-time validation error: Please enter a valid email address",
+    "priority": "Medium",
+    "type": "UI"
+  },
+  {
+    "id": "TC_014",
+    "module": "Authentication",
+    "title": "Password strength indicator on signup",
+    "preconditions": "User is on registration page",
+    "steps": "1. Navigate to signup page\n2. Start typing password\n3. Observe strength indicator",
+    "expectedResult": "Password strength indicator shows Weak/Medium/Strong based on complexity",
+    "priority": "Low",
+    "type": "UI"
+  },
+  {
+    "id": "TC_015",
+    "module": "Authentication",
+    "title": "Rate limiting on failed login attempts",
+    "preconditions": "User is on login page",
+    "steps": "1. Enter wrong password 5 times consecutively",
+    "expectedResult": "Account is temporarily locked; rate limiting message displayed",
+    "priority": "High",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_016",
+    "module": "Dashboard & Navigation",
+    "title": "Dashboard loads after login",
+    "preconditions": "User is logged in",
+    "steps": "1. Login with valid credentials\n2. Observe dashboard",
+    "expectedResult": "Dashboard loads within 2 seconds showing summary widgets and recent activity",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_017",
+    "module": "Dashboard & Navigation",
+    "title": "Navigation sidebar displays all modules",
+    "preconditions": "User is on dashboard",
+    "steps": "1. Observe left sidebar navigation",
+    "expectedResult": "Sidebar shows: A/B Testing, Heatmaps, Session Recordings, Funnels, Personalization, Reports, Settings",
+    "priority": "High",
+    "type": "UI"
+  },
+  {
+    "id": "TC_018",
+    "module": "Dashboard & Navigation",
+    "title": "Switch between Light and Dark mode",
+    "preconditions": "User is on dashboard",
+    "steps": "1. Click theme toggle\n2. Select Dark Mode\n3. Verify UI\n4. Switch back to Light Mode",
+    "expectedResult": "Theme changes successfully; all UI elements render correctly in both modes",
+    "priority": "Medium",
+    "type": "UI"
+  },
+  {
+    "id": "TC_019",
+    "module": "Dashboard & Navigation",
+    "title": "Responsive layout on tablet",
+    "preconditions": "User accesses VWO on tablet",
+    "steps": "1. Open app.vwo.com on tablet browser\n2. Navigate through modules",
+    "expectedResult": "Layout adapts responsively; no horizontal scroll; all elements accessible",
+    "priority": "Medium",
+    "type": "UI"
+  },
+  {
+    "id": "TC_020",
+    "module": "Dashboard & Navigation",
+    "title": "Responsive layout on mobile",
+    "preconditions": "User accesses VWO on mobile",
+    "steps": "1. Open app.vwo.com on mobile browser\n2. Navigate through modules",
+    "expectedResult": "Mobile-friendly layout with hamburger menu; touch-friendly controls",
+    "priority": "Medium",
+    "type": "UI"
+  },
+  {
+    "id": "TC_021",
+    "module": "Dashboard & Navigation",
+    "title": "Breadcrumb navigation",
+    "preconditions": "User is in a nested page",
+    "steps": "1. Navigate to A/B Testing > Campaign > Edit\n2. Observe breadcrumb",
+    "expectedResult": "Breadcrumb shows correct path; clicking parent navigates back correctly",
+    "priority": "Low",
+    "type": "UI"
+  },
+  {
+    "id": "TC_022",
+    "module": "Dashboard & Navigation",
+    "title": "Dashboard recent activity widget",
+    "preconditions": "User has prior campaigns",
+    "steps": "1. Login and view dashboard\n2. Check recent activity section",
+    "expectedResult": "Recent campaigns, tests, and changes are displayed in chronological order",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_023",
+    "module": "Dashboard & Navigation",
+    "title": "Quick search from dashboard",
+    "preconditions": "User is on dashboard",
+    "steps": "1. Click search bar\n2. Type a campaign name\n3. Press Enter",
+    "expectedResult": "Relevant campaigns and tests are shown in search results",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_024",
+    "module": "Dashboard & Navigation",
+    "title": "Keyboard navigation accessibility",
+    "preconditions": "User is on dashboard",
+    "steps": "1. Use Tab key to navigate through interactive elements\n2. Use Enter to activate buttons",
+    "expectedResult": "All interactive elements are accessible via keyboard; focus indicators visible",
+    "priority": "Medium",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_025",
+    "module": "Dashboard & Navigation",
+    "title": "Screen reader compatibility",
+    "preconditions": "User is on dashboard with screen reader",
+    "steps": "1. Enable screen reader\n2. Navigate through dashboard",
+    "expectedResult": "ARIA labels are announced correctly; all elements are screen-reader accessible",
+    "priority": "Low",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_026",
+    "module": "A/B Testing",
+    "title": "Create new A/B test campaign",
+    "preconditions": "User is logged in with campaign creation permissions",
+    "steps": "1. Navigate to A/B Testing\n2. Click Create New Test\n3. Enter campaign name\n4. Define test URL\n5. Save",
+    "expectedResult": "New A/B test campaign is created and visible in campaigns list",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_027",
+    "module": "A/B Testing",
+    "title": "Add variation to A/B test",
+    "preconditions": "An A/B test campaign exists",
+    "steps": "1. Open existing campaign\n2. Click Add Variation\n3. Configure variation changes\n4. Save",
+    "expectedResult": "New variation is added to the campaign and displayed in variations list",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_028",
+    "module": "A/B Testing",
+    "title": "Configure goals for A/B test",
+    "preconditions": "An A/B test campaign exists with variations",
+    "steps": "1. Open campaign\n2. Navigate to Goals section\n3. Add a goal (e.g., Click, Page Visit, Revenue)\n4. Save",
+    "expectedResult": "Goal is configured and associated with the campaign",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_029",
+    "module": "A/B Testing",
+    "title": "Set traffic split between variations",
+    "preconditions": "A/B test has 2+ variations",
+    "steps": "1. Open campaign\n2. Navigate to Traffic Allocation\n3. Set split (e.g., 50/50)\n4. Save",
+    "expectedResult": "Traffic is split as configured between variations",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_030",
+    "module": "A/B Testing",
+    "title": "Start A/B test campaign",
+    "preconditions": "Campaign has URL, variations, and goals configured",
+    "steps": "1. Open campaign\n2. Click Start\n3. Confirm",
+    "expectedResult": "Campaign status changes to Running; tracking begins",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_031",
+    "module": "A/B Testing",
+    "title": "Pause running A/B test",
+    "preconditions": "A campaign is currently running",
+    "steps": "1. Open running campaign\n2. Click Pause\n3. Confirm",
+    "expectedResult": "Campaign status changes to Paused; data collection stops",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_032",
+    "module": "A/B Testing",
+    "title": "Stop and archive A/B test",
+    "preconditions": "A campaign is running or paused",
+    "steps": "1. Open campaign\n2. Click Stop\n3. Confirm\n4. Optionally archive",
+    "expectedResult": "Campaign is stopped and can be archived; historical data preserved",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_033",
+    "module": "A/B Testing",
+    "title": "Duplicate an existing campaign",
+    "preconditions": "An A/B test campaign exists",
+    "steps": "1. Open campaign\n2. Click Duplicate\n3. Modify name\n4. Save",
+    "expectedResult": "A copy of the campaign is created with all settings replicated",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_034",
+    "module": "A/B Testing",
+    "title": "Delete an A/B test campaign",
+    "preconditions": "A draft or stopped campaign exists",
+    "steps": "1. Open campaign\n2. Click Delete\n3. Confirm deletion",
+    "expectedResult": "Campaign is permanently deleted; removed from campaigns list",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_035",
+    "module": "A/B Testing",
+    "title": "View A/B test results",
+    "preconditions": "A completed A/B test has collected data",
+    "steps": "1. Open completed campaign\n2. Navigate to Results tab",
+    "expectedResult": "Results show conversion rates, statistical significance, and winner declaration",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_036",
+    "module": "A/B Testing",
+    "title": "Edit variation using Visual Editor",
+    "preconditions": "Campaign is in draft state",
+    "steps": "1. Open campaign variation\n2. Launch Visual Editor\n3. Make element changes\n4. Save",
+    "expectedResult": "Changes are saved to the variation and reflected in preview",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_037",
+    "module": "A/B Testing",
+    "title": "Preview A/B test variation",
+    "preconditions": "Variations are configured",
+    "steps": "1. Open campaign\n2. Click Preview on a variation",
+    "expectedResult": "Variation preview loads showing the modified page correctly",
+    "priority": "Medium",
+    "type": "UI"
+  },
+  {
+    "id": "TC_038",
+    "module": "A/B Testing",
+    "title": "Set audience targeting for campaign",
+    "preconditions": "Campaign exists in draft",
+    "steps": "1. Open campaign\n2. Navigate to Targeting\n3. Set conditions (URL, device, location)\n4. Save",
+    "expectedResult": "Targeting rules are saved and applied to the campaign",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_039",
+    "module": "A/B Testing",
+    "title": "Schedule A/B test for future date",
+    "preconditions": "Campaign is fully configured",
+    "steps": "1. Open campaign\n2. Set schedule start date/time\n3. Save",
+    "expectedResult": "Campaign is scheduled and auto-starts at the configured date/time",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_040",
+    "module": "A/B Testing",
+    "title": "Multi-page A/B test setup",
+    "preconditions": "User needs cross-page testing",
+    "steps": "1. Create campaign\n2. Enable Multi-page test\n3. Add multiple URLs\n4. Configure variations per page\n5. Save",
+    "expectedResult": "Multi-page test is configured; all pages track together as one campaign",
+    "priority": "Medium",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_041",
+    "module": "Heatmaps & Session Recordings",
+    "title": "Create a new heatmap",
+    "preconditions": "User is logged in",
+    "steps": "1. Navigate to Heatmaps\n2. Click Create New\n3. Enter target URL\n4. Save",
+    "expectedResult": "Heatmap is created and tracking begins on the target URL",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_042",
+    "module": "Heatmaps & Session Recordings",
+    "title": "View click heatmap data",
+    "preconditions": "Heatmap has collected click data",
+    "steps": "1. Open heatmap\n2. Select Click Map view",
+    "expectedResult": "Click heatmap displays with color-coded hotspots showing click density",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_043",
+    "module": "Heatmaps & Session Recordings",
+    "title": "View scroll heatmap data",
+    "preconditions": "Heatmap has collected scroll data",
+    "steps": "1. Open heatmap\n2. Select Scroll Map view",
+    "expectedResult": "Scroll depth visualization shows percentage of users reaching each section",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_044",
+    "module": "Heatmaps & Session Recordings",
+    "title": "View mouse tracking heatmap",
+    "preconditions": "Heatmap has collected movement data",
+    "steps": "1. Open heatmap\n2. Select Mouse Tracking view",
+    "expectedResult": "Mouse movement overlay shows areas of user attention and hover patterns",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_045",
+    "module": "Heatmaps & Session Recordings",
+    "title": "Create session recording",
+    "preconditions": "User is logged in",
+    "steps": "1. Navigate to Session Recordings\n2. Click Create New\n3. Configure target page and sample rate\n4. Save",
+    "expectedResult": "Session recording is activated on the target page",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_046",
+    "module": "Heatmaps & Session Recordings",
+    "title": "Playback session recording",
+    "preconditions": "Recordings have been captured",
+    "steps": "1. Navigate to Session Recordings list\n2. Select a recording\n3. Click Play",
+    "expectedResult": "Session replay shows user interactions including clicks, scrolls, and navigation",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_047",
+    "module": "Heatmaps & Session Recordings",
+    "title": "Filter session recordings by date",
+    "preconditions": "Multiple recordings exist",
+    "steps": "1. Open Session Recordings\n2. Apply date range filter",
+    "expectedResult": "Only recordings within the selected date range are displayed",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_048",
+    "module": "Heatmaps & Session Recordings",
+    "title": "Filter session recordings by device",
+    "preconditions": "Multiple recordings exist",
+    "steps": "1. Open Session Recordings\n2. Filter by device type (Desktop/Mobile/Tablet)",
+    "expectedResult": "Only recordings matching the selected device type are shown",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_049",
+    "module": "Heatmaps & Session Recordings",
+    "title": "Delete a heatmap",
+    "preconditions": "A heatmap exists",
+    "steps": "1. Open Heatmaps list\n2. Select a heatmap\n3. Click Delete\n4. Confirm",
+    "expectedResult": "Heatmap is deleted; tracking stops; data is removed",
+    "priority": "Low",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_050",
+    "module": "Heatmaps & Session Recordings",
+    "title": "Heatmap data export",
+    "preconditions": "Heatmap has data",
+    "steps": "1. Open heatmap with data\n2. Click Export\n3. Select format",
+    "expectedResult": "Heatmap data is exported in the selected format (CSV/PDF)",
+    "priority": "Medium",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_051",
+    "module": "Funnels & Form Analytics",
+    "title": "Create a new funnel",
+    "preconditions": "User is logged in",
+    "steps": "1. Navigate to Funnels\n2. Click Create New Funnel\n3. Add funnel steps (URLs)\n4. Save",
+    "expectedResult": "Funnel is created and begins tracking user progression through steps",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_052",
+    "module": "Funnels & Form Analytics",
+    "title": "View funnel conversion rates",
+    "preconditions": "Funnel has collected data",
+    "steps": "1. Open funnel\n2. View conversion visualization",
+    "expectedResult": "Funnel chart shows drop-off rates between each step with percentages",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_053",
+    "module": "Funnels & Form Analytics",
+    "title": "Edit funnel steps",
+    "preconditions": "An existing funnel is created",
+    "steps": "1. Open funnel\n2. Add/remove/reorder steps\n3. Save",
+    "expectedResult": "Funnel steps are updated; tracking reflects new step configuration",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_054",
+    "module": "Funnels & Form Analytics",
+    "title": "Create form analytics tracking",
+    "preconditions": "User is logged in",
+    "steps": "1. Navigate to Form Analytics\n2. Click Create New\n3. Enter form page URL\n4. Save",
+    "expectedResult": "Form analytics tracking is activated on the specified form",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_055",
+    "module": "Funnels & Form Analytics",
+    "title": "View form field interaction data",
+    "preconditions": "Form analytics has collected data",
+    "steps": "1. Open form analytics report",
+    "expectedResult": "Report shows field-level metrics: time spent, hesitation, drop-off per field",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_056",
+    "module": "Funnels & Form Analytics",
+    "title": "Filter funnel data by date range",
+    "preconditions": "Funnel has historical data",
+    "steps": "1. Open funnel\n2. Apply date range filter",
+    "expectedResult": "Funnel data is filtered to show only the selected date range",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_057",
+    "module": "Funnels & Form Analytics",
+    "title": "Compare funnel segments",
+    "preconditions": "Funnel has data from multiple segments",
+    "steps": "1. Open funnel\n2. Apply segment comparison",
+    "expectedResult": "Side-by-side comparison shows conversion differences between segments",
+    "priority": "Medium",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_058",
+    "module": "Funnels & Form Analytics",
+    "title": "Delete a funnel",
+    "preconditions": "A funnel exists",
+    "steps": "1. Open Funnels list\n2. Select funnel\n3. Click Delete\n4. Confirm",
+    "expectedResult": "Funnel is deleted; tracking stops",
+    "priority": "Low",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_059",
+    "module": "Personalization & Feature Flags",
+    "title": "Create personalization campaign",
+    "preconditions": "User is logged in with permissions",
+    "steps": "1. Navigate to Personalization\n2. Click Create Campaign\n3. Define audience segment\n4. Configure personalized content\n5. Save",
+    "expectedResult": "Personalization campaign is created targeting the specified audience",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_060",
+    "module": "Personalization & Feature Flags",
+    "title": "Set audience targeting rules",
+    "preconditions": "Personalization campaign exists in draft",
+    "steps": "1. Open campaign\n2. Navigate to Targeting\n3. Add rules (location, device, behavior)\n4. Save",
+    "expectedResult": "Targeting rules are saved and will filter users for personalization",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_061",
+    "module": "Personalization & Feature Flags",
+    "title": "Activate personalization campaign",
+    "preconditions": "Campaign is fully configured",
+    "steps": "1. Open campaign\n2. Click Activate\n3. Confirm",
+    "expectedResult": "Campaign status changes to Active; personalized content serves to matched users",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_062",
+    "module": "Personalization & Feature Flags",
+    "title": "Create a feature flag",
+    "preconditions": "User has feature flag permissions",
+    "steps": "1. Navigate to Feature Flags\n2. Click Create Flag\n3. Enter flag name and key\n4. Configure rollout percentage\n5. Save",
+    "expectedResult": "Feature flag is created with specified rollout configuration",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_063",
+    "module": "Personalization & Feature Flags",
+    "title": "Toggle feature flag on/off",
+    "preconditions": "A feature flag exists",
+    "steps": "1. Open feature flag\n2. Toggle Enable/Disable\n3. Save",
+    "expectedResult": "Feature flag state changes; feature availability updates accordingly",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_064",
+    "module": "Personalization & Feature Flags",
+    "title": "Set feature flag rollout percentage",
+    "preconditions": "Feature flag exists",
+    "steps": "1. Open feature flag\n2. Set rollout to 25%\n3. Save",
+    "expectedResult": "Flag is enabled for 25% of users; gradual rollout works correctly",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_065",
+    "module": "Personalization & Feature Flags",
+    "title": "Delete personalization campaign",
+    "preconditions": "A stopped campaign exists",
+    "steps": "1. Open campaign\n2. Click Delete\n3. Confirm",
+    "expectedResult": "Campaign is deleted; personalized content no longer serves",
+    "priority": "Low",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_066",
+    "module": "Personalization & Feature Flags",
+    "title": "View personalization campaign results",
+    "preconditions": "Campaign has collected data",
+    "steps": "1. Open campaign\n2. Navigate to Results tab",
+    "expectedResult": "Results show impressions, conversions, and revenue impact of personalization",
+    "priority": "Medium",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_067",
+    "module": "Reports & Analytics",
+    "title": "View campaign summary report",
+    "preconditions": "Campaigns have collected data",
+    "steps": "1. Navigate to Reports\n2. Select campaign\n3. View summary",
+    "expectedResult": "Summary report shows key metrics: visitors, conversions, revenue, significance",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_068",
+    "module": "Reports & Analytics",
+    "title": "Export report as PDF",
+    "preconditions": "Report data is available",
+    "steps": "1. Open a report\n2. Click Export\n3. Select PDF format",
+    "expectedResult": "Report is downloaded as a formatted PDF document",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_069",
+    "module": "Reports & Analytics",
+    "title": "Export report as CSV",
+    "preconditions": "Report data is available",
+    "steps": "1. Open a report\n2. Click Export\n3. Select CSV format",
+    "expectedResult": "Report data is downloaded as a CSV file with all metrics",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_070",
+    "module": "Reports & Analytics",
+    "title": "Filter report by date range",
+    "preconditions": "Report data spans multiple dates",
+    "steps": "1. Open report\n2. Apply custom date range filter",
+    "expectedResult": "Report data is filtered to show only the selected period",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_071",
+    "module": "Reports & Analytics",
+    "title": "View real-time analytics",
+    "preconditions": "A campaign is currently running",
+    "steps": "1. Open running campaign\n2. Navigate to Live view",
+    "expectedResult": "Real-time data shows current visitors, active variations, and live conversions",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_072",
+    "module": "Reports & Analytics",
+    "title": "Compare variation performance",
+    "preconditions": "A/B test has multiple variations with data",
+    "steps": "1. Open campaign report\n2. View variation comparison",
+    "expectedResult": "Comparison chart shows performance metrics side-by-side for all variations",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_073",
+    "module": "Reports & Analytics",
+    "title": "Statistical significance indicator",
+    "preconditions": "Campaign has sufficient data",
+    "steps": "1. Open campaign report\n2. Check significance indicator",
+    "expectedResult": "Statistical significance percentage is displayed; winner declared when >95%",
+    "priority": "High",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_074",
+    "module": "Reports & Analytics",
+    "title": "Revenue tracking report",
+    "preconditions": "Campaign has revenue goals configured",
+    "steps": "1. Open campaign with revenue goal\n2. View revenue report",
+    "expectedResult": "Revenue per visitor and total revenue are shown per variation",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_075",
+    "module": "Reports & Analytics",
+    "title": "Segmented report view",
+    "preconditions": "Campaign data with segments",
+    "steps": "1. Open report\n2. Apply segment filter (device, location, browser)",
+    "expectedResult": "Report shows metrics broken down by the selected segment",
+    "priority": "Medium",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_076",
+    "module": "Reports & Analytics",
+    "title": "Schedule automated report emails",
+    "preconditions": "Report exists",
+    "steps": "1. Open report\n2. Click Schedule Report\n3. Set recipients and frequency\n4. Save",
+    "expectedResult": "Automated report emails are scheduled and sent at the configured frequency",
+    "priority": "Low",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_077",
+    "module": "User Management & Roles",
+    "title": "Invite new team member",
+    "preconditions": "Admin user is logged in",
+    "steps": "1. Navigate to Settings > Team\n2. Click Invite\n3. Enter email\n4. Assign role\n5. Send invite",
+    "expectedResult": "Invitation email is sent; user appears in pending invites list",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_078",
+    "module": "User Management & Roles",
+    "title": "Assign Admin role to user",
+    "preconditions": "Admin is logged in; team member exists",
+    "steps": "1. Navigate to Team management\n2. Select user\n3. Change role to Admin\n4. Save",
+    "expectedResult": "User role is updated to Admin with full permissions",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_079",
+    "module": "User Management & Roles",
+    "title": "Assign Viewer role restrictions",
+    "preconditions": "Admin is logged in",
+    "steps": "1. Navigate to Team management\n2. Select user\n3. Set role to Viewer\n4. Save",
+    "expectedResult": "User can only view data; create/edit/delete actions are disabled",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_080",
+    "module": "User Management & Roles",
+    "title": "Remove team member",
+    "preconditions": "Admin is logged in; member exists",
+    "steps": "1. Navigate to Team management\n2. Select user\n3. Click Remove\n4. Confirm",
+    "expectedResult": "User is removed from the account; access is revoked immediately",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_081",
+    "module": "User Management & Roles",
+    "title": "View audit trail of user actions",
+    "preconditions": "Admin is logged in",
+    "steps": "1. Navigate to Settings > Audit Log",
+    "expectedResult": "Audit log shows timestamped entries of all user actions (login, changes, etc.)",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_082",
+    "module": "User Management & Roles",
+    "title": "Edit own profile information",
+    "preconditions": "User is logged in",
+    "steps": "1. Click profile avatar\n2. Edit name/email/photo\n3. Save",
+    "expectedResult": "Profile information is updated successfully",
+    "priority": "Low",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_083",
+    "module": "User Management & Roles",
+    "title": "Change account password",
+    "preconditions": "User is logged in",
+    "steps": "1. Navigate to Profile > Security\n2. Enter current password\n3. Enter new password\n4. Confirm and Save",
+    "expectedResult": "Password is updated; user can login with new password",
+    "priority": "Medium",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_084",
+    "module": "User Management & Roles",
+    "title": "Access control for restricted modules",
+    "preconditions": "Viewer role user is logged in",
+    "steps": "1. Login as Viewer role\n2. Try to access Campaign Creation\n3. Try to modify settings",
+    "expectedResult": "Access denied message shown; restricted actions are blocked",
+    "priority": "High",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_085",
+    "module": "Integrations & Settings",
+    "title": "Connect Google Analytics integration",
+    "preconditions": "Admin user is logged in",
+    "steps": "1. Navigate to Integrations\n2. Select Google Analytics\n3. Enter tracking ID\n4. Authenticate\n5. Save",
+    "expectedResult": "Google Analytics integration is connected and data sync begins",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_086",
+    "module": "Integrations & Settings",
+    "title": "Configure webhook notification",
+    "preconditions": "Admin is logged in",
+    "steps": "1. Navigate to Integrations\n2. Click Webhooks\n3. Add webhook URL\n4. Select trigger events\n5. Save",
+    "expectedResult": "Webhook is configured; notifications fire on selected events",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_087",
+    "module": "Integrations & Settings",
+    "title": "Disconnect an integration",
+    "preconditions": "An integration is active",
+    "steps": "1. Navigate to Integrations\n2. Select active integration\n3. Click Disconnect\n4. Confirm",
+    "expectedResult": "Integration is disconnected; data sync stops",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_088",
+    "module": "Integrations & Settings",
+    "title": "Configure account-level settings",
+    "preconditions": "Admin is logged in",
+    "steps": "1. Navigate to Settings > Account\n2. Update account name, timezone\n3. Save",
+    "expectedResult": "Account settings are updated and reflected across the platform",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_089",
+    "module": "Integrations & Settings",
+    "title": "Set up custom domain for tracking",
+    "preconditions": "Admin is logged in",
+    "steps": "1. Navigate to Settings > Tracking\n2. Add custom domain\n3. Verify DNS configuration",
+    "expectedResult": "Custom domain is verified and tracking uses the custom domain",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_090",
+    "module": "Integrations & Settings",
+    "title": "API key generation",
+    "preconditions": "Admin user is logged in",
+    "steps": "1. Navigate to Settings > API\n2. Click Generate New Key\n3. Copy API key",
+    "expectedResult": "New API key is generated and displayed; can be used for API calls",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_091",
+    "module": "Integrations & Settings",
+    "title": "Revoke API key",
+    "preconditions": "Active API key exists",
+    "steps": "1. Navigate to Settings > API\n2. Select API key\n3. Click Revoke\n4. Confirm",
+    "expectedResult": "API key is revoked; requests using it return 401 Unauthorized",
+    "priority": "High",
+    "type": "Regression"
+  },
+  {
+    "id": "TC_092",
+    "module": "Integrations & Settings",
+    "title": "SMTP email configuration",
+    "preconditions": "Admin is logged in",
+    "steps": "1. Navigate to Settings > Email\n2. Configure SMTP server details\n3. Send test email\n4. Save",
+    "expectedResult": "SMTP settings are saved; test email is received successfully",
+    "priority": "Low",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_093",
+    "module": "Billing & Subscription",
+    "title": "View current subscription plan",
+    "preconditions": "User is logged in",
+    "steps": "1. Navigate to Settings > Billing\n2. View current plan",
+    "expectedResult": "Current plan details are displayed: plan name, features, renewal date",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_094",
+    "module": "Billing & Subscription",
+    "title": "Upgrade subscription plan",
+    "preconditions": "User is on a lower-tier plan",
+    "steps": "1. Navigate to Billing\n2. Click Upgrade\n3. Select higher plan\n4. Enter payment details\n5. Confirm",
+    "expectedResult": "Plan is upgraded; new features are immediately available",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_095",
+    "module": "Billing & Subscription",
+    "title": "Downgrade subscription plan",
+    "preconditions": "User is on a higher-tier plan",
+    "steps": "1. Navigate to Billing\n2. Click Change Plan\n3. Select lower plan\n4. Confirm",
+    "expectedResult": "Plan is downgraded at end of current billing cycle; features adjusted",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_096",
+    "module": "Billing & Subscription",
+    "title": "Update payment method",
+    "preconditions": "User has billing access",
+    "steps": "1. Navigate to Billing\n2. Click Payment Methods\n3. Add new card\n4. Set as default\n5. Save",
+    "expectedResult": "Payment method is updated; next billing uses the new card",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_097",
+    "module": "Billing & Subscription",
+    "title": "View billing history",
+    "preconditions": "Payments have been made",
+    "steps": "1. Navigate to Billing > History",
+    "expectedResult": "Billing history shows all past invoices with dates, amounts, and status",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_098",
+    "module": "Billing & Subscription",
+    "title": "Download invoice",
+    "preconditions": "Billing history has entries",
+    "steps": "1. Navigate to Billing > History\n2. Click Download on an invoice",
+    "expectedResult": "Invoice is downloaded as a PDF with all billing details",
+    "priority": "Medium",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_099",
+    "module": "Billing & Subscription",
+    "title": "Cancel subscription",
+    "preconditions": "User has an active subscription",
+    "steps": "1. Navigate to Billing\n2. Click Cancel Subscription\n3. Provide cancellation reason\n4. Confirm",
+    "expectedResult": "Subscription is marked for cancellation at end of billing period",
+    "priority": "High",
+    "type": "Functional"
+  },
+  {
+    "id": "TC_100",
+    "module": "Billing & Subscription",
+    "title": "Free trial expiration handling",
+    "preconditions": "User is on a free trial",
+    "steps": "1. Allow trial period to expire\n2. Attempt to login",
+    "expectedResult": "User sees trial expired message with options to upgrade or contact sales",
+    "priority": "High",
+    "type": "Regression"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "name": "tc-rag-system",
+  "version": "1.0.0",
+  "description": "RAG Pipeline - Regression Test Case Suggester for app.vwo.com",
+  "scripts": {
+    "generate-excel": "node generate_excel.js",
+    "generate-tc": "node generate_test_cases.js"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  }
+}

@@ -1,0 +1,96 @@
+# RAG Pipeline Prompt — Regression Test Case Suggester for app.vwo.com
+
+Build a fully functional **RAG (Retrieval-Augmented Generation) Pipeline** for regression test case suggestion, focused on **app.vwo.com**. Follow these steps precisely:
+
+---
+
+## STEP 1 — Generate 100 Test Cases for app.vwo.com
+
+Generate **100 realistic, comprehensive regression test cases** for the VWO web app (`app.vwo.com`). Cover key modules such as:
+[Strictly follow]:
+- **vwo_prd.md and vwo_test_plan.md file PRD while generation Test Cases**
+- **Anti_HallucinationRules.md file for antihallucination**
+-
+
+- Authentication (Login, Logout, SSO, Password Reset)
+- Dashboard & Navigation
+- A/B Testing (Campaign creation, variations, goals, traffic split)
+- Heatmaps & Session Recordings
+- Funnels & Form Analytics
+- Personalization & Feature Flags
+- Reports & Analytics
+- User Management & Roles
+- Integrations & Settings
+- Billing & Subscription
+
+Each test case must include:
+
+| Field | Description |
+|---|---|
+| **Test Case ID** | Unique ID (e.g., TC_001) |
+| **Module** | Feature area (e.g., Login, A/B Testing) |
+| **Test Case Title** | Short descriptive title |
+| **Preconditions** | Setup required before execution |
+| **Test Steps** | Step-by-step actions |
+| **Expected Result** | What should happen |
+| **Priority** | High / Medium / Low |
+| **Type** | Functional / UI / Regression / Smoke |
+
+---
+
+## STEP 2 — Export Test Cases to Excel
+
+Save all 100 test cases into a well-formatted **Excel file** (`.xlsx`) with:
+
+- Proper column headers
+- Alternating row colors for readability
+- Auto-fitted column widths
+- A sheet named `"VWO Regression Test Cases"`
+
+---
+
+## STEP 3 — Build a Naive RAG Pipeline (UI App)
+
+Using the generated test cases as the **knowledge base**, build an interactive **RAG pipeline web app** with the following features:
+
+### 📄 Chunking Viewer Panel
+
+- Display all test cases as individual **chunks**
+- Each chunk should show: Test Case ID, Module, Title, and a preview of steps
+- Allow the user to **browse/scroll through all chunks**
+
+### 🔍 Retrieval Search Box
+
+- A prominent text input where the user can type natural language queries
+- Example queries:
+  - *"Do we have a test case related to login?"*
+  - *"Show me all high priority A/B testing test cases"*
+  - *"Find test cases for password reset"*
+- Use **semantic similarity / keyword matching** to retrieve the **top N most relevant test cases**
+- Display matched test cases with a **relevance score or highlight**
+
+### 💡 Regression Test Case Suggester
+
+- Based on the retrieved results, use the RAG model to **suggest relevant regression test cases** to run
+- Show a clean summary:
+  > *"For your query about X, we recommend running these N test cases: [list]"*
+
+---
+
+## STEP 4 — UI/UX Requirements
+
+- Clean, modern interface (use React or plain HTML/CSS/JS)
+- Sidebar for chunk browsing
+- Main area for search + results
+- Color-coded priority badges:
+  - 🔴 High
+  - 🟠 Medium
+  - 🟢 Low
+- Responsive layout
+
+---
+
+## Deliverables
+
+1. ✅ The 100 test cases in an `.xlsx` file
+2. ✅ A fully working RAG pipeline web app (single file or component)
